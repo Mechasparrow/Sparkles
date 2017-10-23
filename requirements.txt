@@ -1,6 +1,16 @@
 asn1crypto==0.23.0
 cffi==1.11.2
+click==6.7
 cryptography==2.1.1
+Flask==0.12.2
+Flask-Sockets==0.2.1
+gevent==1.2.2
+gevent-websocket==0.10.1
+greenlet==0.4.12
 idna==2.6
+itsdangerous==0.24
+Jinja2==2.9.6
+MarkupSafe==1.0
 pycparser==2.18
 six==1.11.0
+Werkzeug==0.12.2
