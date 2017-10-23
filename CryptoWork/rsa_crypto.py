@@ -27,3 +27,13 @@ def write_to_file(key_text, file_path):
     f = open(file_path, 'wb')
     f.write(key_text)
     f.close()
+
+def read_from_file(file_path):
+    with open(file_path, "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+            key_file.read(),
+            password=None,
+            backend=default_backend()
+        )
+
+        return private_key
