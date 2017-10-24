@@ -1,7 +1,7 @@
 import websocket
 from websocket import create_connection
 
-ws = create_connection("ws://sparkle-coin-server.herokuapp.com/echo")
+ws = create_connection("ws://localhost:5000/echo")
 
 ws.send("hello there")
 
