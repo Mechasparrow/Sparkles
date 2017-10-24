@@ -7,6 +7,12 @@ import os
 app = Flask(__name__)
 sockets = Sockets(app)
 
+try:
+    port = int(os.environ["PORT"])
+except KeyError:
+    port = 5000
+
+print(port)
 
 @sockets.route('/echo')
 def echo_socket(ws):
@@ -23,5 +29,5 @@ def hello():
 if __name__ == "__main__":
     from gevent import pywsgi
     from geventwebsocket.handler import WebSocketHandler
-    server = pywsgi.WSGIServer(('', int(os.environ["PORT"])), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer(('', port), app, handler_class=WebSocketHandler)
     server.serve_forever()
