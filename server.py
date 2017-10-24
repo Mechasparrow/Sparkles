@@ -23,5 +23,5 @@ def hello():
 if __name__ == "__main__":
     from gevent import pywsgi
     from geventwebsocket.handler import WebSocketHandler
-    server = pywsgi.WSGIServer(('', os.environ["PORT"]), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer(('', int(os.environ["PORT"])), app, handler_class=WebSocketHandler)
     server.serve_forever()
