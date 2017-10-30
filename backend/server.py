@@ -9,7 +9,7 @@ socketio = SocketIO(app)
 @socketio.on('message')
 def handle_message(message):
     print(message)
-    send(message)
+    emit('message_response', {'data': 'got message'})
 
 if __name__ == '__main__':
     socketio.run(app)

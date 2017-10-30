@@ -1,14 +1,17 @@
 from socketIO_client import SocketIO, LoggingNamespace
 
+import pickle
+
 def on_connect():
     print ('connected to backend')
 
-def on_message(message):
+def on_message_response(*args):
+    message = args[0]['data']
     print (message)
 
 socketIO = SocketIO('localhost', 8000, LoggingNamespace)
 
-socketIO.send('connect')
+socketIO.send('hello there')
+socketIO.emit("message");
+socketIO.on('message_response', on_message_response)
 socketIO.wait(seconds=1)
-
-socketIO.on('message', on_message)
