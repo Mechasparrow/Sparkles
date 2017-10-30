@@ -1,7 +1,5 @@
 from socketIO_client import SocketIO, LoggingNamespace
 
-import pickle
-
 def on_connect():
     print ('connected to backend')
 
