@@ -9,3 +9,10 @@ def get_public_key(secret_key):
 
 def sign_message(sk, message):
     return sk.sign(message)
+
+def save_key(key, path):
+    key_pem = key.to_pem()
+    pem = open (path, 'wb')
+    pem.write(key_pem)
+    pem.close()
+    print ("file saved")
