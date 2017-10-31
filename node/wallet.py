@@ -1,15 +1,17 @@
 from transaction import Transaction
 
-print ("Hello wecome to Spark wallet v1 what would you like to do")
-print("- check balance")
-print("- create transaction")
-print("- create address")
+import sys
+
+sys.path.append("../CryptoWork")
+
+import crypto_key_gen
 
 address = input ("Input the address to send to: ")
 
-transaction = Transaction(address, 1, "123asdf")
+sender = ""
+
+pk = "meh"
+
+transaction = Transaction(sender, address, 10, pk)
 
 print (transaction.view_transaction())
-
-print (transaction)
-
