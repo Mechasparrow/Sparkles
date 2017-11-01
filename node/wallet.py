@@ -1,4 +1,5 @@
 from transaction import Transaction
+import base64
 
 import sys
 
@@ -6,12 +7,19 @@ sys.path.append("../CryptoWork")
 
 import crypto_key_gen
 
-address = input ("Input the address to send to: ")
+sender = "abcdfef"
 
-sender = ""
+address = "catz"
 
-pk = "meh"
+sk = crypto_key_gen.generate_key()
+pk = crypto_key_gen.get_public_key(sk)
 
-transaction = Transaction(sender, address, 10, pk)
+pk_hex = base64.b16encode(pk.to_string())
 
-print (transaction.view_transaction())
+transaction = Transaction(pk_hex, address, 10, sk)
+
+transaction_info = transaction.view_transaction()
+
+print (transaction_info)
+
+transaction.verify_transaction(transaction_info['signature'])
