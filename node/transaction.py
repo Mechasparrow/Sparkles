@@ -23,11 +23,15 @@ class Transaction:
         }
 
         raw_transaction_json = json.dumps(self.raw_transaction)
-        self.raw_transaction_hash = hashlib.sha256(raw_transaction_json).hexdigest()
+        print (raw_transaction_json)
+
+        self.raw_transaction_hash = hashlib.sha256(raw_transaction_json.encode('utf-8')).hexdigest()
+
+        print (self.raw_transaction_hash)
 
     def view_transaction(self):
 
-        signature = base64.b16encode(self.private_key.sign(self.raw_transaction_hash))
+        signature = base64.b16encode(self.private_key.sign(self.raw_transaction_hash.encode('utf-8'))).decode('utf-8')
 
         new_transaction = self.raw_transaction.copy()
         new_transaction.update({"signature": signature})
@@ -39,6 +43,6 @@ class Transaction:
     def verify_transaction(self, signature):
 
         pk = crypto_key_gen.from_public_hex(self.sender_pub_key)
-
         decoded_signature = base64.b16decode(signature)
+
         print(crypto_key_gen.validate_signature(pk, decoded_signature, self.raw_transaction_hash))

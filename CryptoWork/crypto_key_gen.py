@@ -15,8 +15,12 @@ def from_public_hex(public_hex):
     return pk
 
 def validate_signature(public_key, signature, message):
+
+    print (signature)
+    print (message)
+
     try:
-        return public_key.verify(signature, message)
+        return public_key.verify(signature, message.encode())
     except BadSignatureError as e:
         return False
 
