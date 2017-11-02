@@ -27,7 +27,7 @@ class Transaction:
 
         self.raw_transaction_hash = hashlib.sha256(raw_transaction_json.encode('utf-8')).hexdigest()
 
-        print (self.raw_transaction_hash)
+        #print (self.raw_transaction_hash)
 
     def view_transaction(self):
 
@@ -35,8 +35,6 @@ class Transaction:
 
         new_transaction = self.raw_transaction.copy()
         new_transaction.update({"signature": signature})
-
-        #print (new_transaction)
 
         return new_transaction
 
