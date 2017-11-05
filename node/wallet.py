@@ -17,9 +17,4 @@ pk = crypto_key_gen.get_public_key(sk)
 pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
 
 transaction = Transaction(pk_hex, address, 10, sk)
-
-transaction_info = transaction.view_transaction()
-
-print (transaction_info)
-
-transaction.verify_transaction(transaction_info['signature'])
+print (transaction.validate_transaction())

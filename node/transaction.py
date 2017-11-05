@@ -10,39 +10,45 @@ import crypto_key_gen
 
 class Transaction:
 
-    def __init__(self, sender, address, amnt, private_key):
-        self.private_key = private_key
+    def __init__(self, sender, address, amnt, private_key=None, signature = None):
         self.sender_pub_key = sender
         self.address = address
         self.amnt = amnt
+        self.signature = signature
 
-        self.raw_transaction = {
-            "from_pub_key": self.sender_pub_key,
-            "to_address": self.address,
-            "amnt": self.amnt,
+        if (signature == None):
+            self.signature = self.generate_signature(private_key)
+
+    def __dict__(self):
+        transaction_dict = {
+            "sender_pub_key": str(self.sender_pub_key),
+            "address": str(self.address),
+            "amnt": str(self.amnt),
+            "signature": str(self.signature)
         }
 
-        raw_transaction_json = json.dumps(self.raw_transaction)
-        print (raw_transaction_json)
+        return transaction_dict
 
-        self.raw_transaction_hash = hashlib.sha256(raw_transaction_json.encode('utf-8')).hexdigest()
+    def __str__(self):
+        transaction_dict = self.__dict__()
+        transaction_json = json.dumps(transaction_dict)
+        return transaction_json
 
-        print (self.raw_transaction_hash)
+    def get_hash(self):
+        hash_pre_string = str(self.sender_pub_key) + str(self.address) + str(self.amnt)
+        m = hashlib.sha256()
+        m.update(hash_pre_string.encode('utf-8'))
+        return m.hexdigest()
 
-    def view_transaction(self):
+    def generate_signature(self, private_key):
+        hash_string = self.get_hash().encode('utf-8')
+        signature = crypto_key_gen.sign_message(private_key, hash_string)
+        b16_signature = base64.b16encode(signature).decode('utf-8')
+        return b16_signature
 
-        signature = base64.b16encode(self.private_key.sign(self.raw_transaction_hash.encode('utf-8'))).decode('utf-8')
-
-        new_transaction = self.raw_transaction.copy()
-        new_transaction.update({"signature": signature})
-
-        #print (new_transaction)
-
-        return new_transaction
-
-    def verify_transaction(self, signature):
-
-        pk = crypto_key_gen.from_public_hex(self.sender_pub_key)
-        decoded_signature = base64.b16decode(signature)
-
-        print(crypto_key_gen.validate_signature(pk, decoded_signature, self.raw_transaction_hash))
+    def validate_transaction(self):
+        signature = base64.b16decode(self.signature)
+        transaction_hash = self.get_hash()
+        public_key = crypto_key_gen.from_public_hex(self.sender_pub_key)
+        signature_valid = crypto_key_gen.validate_signature(public_key, signature, transaction_hash)
+        return signature_valid
