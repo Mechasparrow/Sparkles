@@ -38,9 +38,7 @@ address_hash = hashlib.sha256(pk2_hex).hexdigest()
 
 sparkle_amnt = 2
 
-transaction = Transaction(pk_hex, address_hash, sparkle_amnt, sk)
-signed_transaction = transaction.view_transaction()
+transaction = Transaction(pk_hex, address_hash, sparkle_amnt, private_key = sk)
+transaction_string = str(transaction)
 
-print (signed_transaction)
-
-socketIO.emit("transaction", signed_transaction)
+socketIO.emit("transaction", transaction_string)
