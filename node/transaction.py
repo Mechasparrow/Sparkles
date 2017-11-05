@@ -52,3 +52,10 @@ class Transaction:
         public_key = crypto_key_gen.from_public_hex(self.sender_pub_key)
         signature_valid = crypto_key_gen.validate_signature(public_key, signature, transaction_hash)
         return signature_valid
+
+    def from_json(transaction_json):
+        transaction_dict = json.loads(transaction_json)
+        return Transaction.from_dict(transaction_dict)
+
+    def from_dict(transaction_dict):
+        return Transaction(sender=transaction_dict['sender_pub_key'],address=transaction_dict['address'], amnt = transaction_dict['amnt'], signature = transaction_dict['signature'])
