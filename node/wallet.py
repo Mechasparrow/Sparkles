@@ -17,6 +17,6 @@ pk2 = crypto_key_gen.get_public_key(sk2)
 
 pk2_hex = base64.b16encode(pk2.to_string()).decode('utf-8')
 
-transaction = Transaction(pk_hex, pk2_hex, 10, sk)
+transaction = Transaction(pk_hex, pk2_hex, 10, private_key = sk)
 
-print(transaction.validate_transaction())
+print(transaction)

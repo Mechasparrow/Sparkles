@@ -10,10 +10,11 @@ import crypto_key_gen
 
 class Transaction:
 
-    def __init__(self, sender, address, amnt, private_key=None, signature = None):
+    def __init__(self, sender, address, amnt, note = "", private_key=None, signature = None):
         self.sender_pub_key = sender
         self.address = address
         self.amnt = amnt
+        self.note = note
         self.signature = signature
 
         if (signature == None):
@@ -24,6 +25,7 @@ class Transaction:
             "sender_pub_key": str(self.sender_pub_key),
             "address": str(self.address),
             "amnt": str(self.amnt),
+            "note": str(self.note),
             "signature": str(self.signature)
         }
 
@@ -35,7 +37,7 @@ class Transaction:
         return transaction_json
 
     def get_hash(self):
-        hash_pre_string = str(self.sender_pub_key) + str(self.address) + str(self.amnt)
+        hash_pre_string = str(self.sender_pub_key) + str(self.address) + str(self.amnt) + str(self.note)
         m = hashlib.sha256()
         m.update(hash_pre_string.encode('utf-8'))
         return m.hexdigest()
@@ -58,4 +60,4 @@ class Transaction:
         return Transaction.from_dict(transaction_dict)
 
     def from_dict(transaction_dict):
-        return Transaction(sender=transaction_dict['sender_pub_key'],address=transaction_dict['address'], amnt = transaction_dict['amnt'], signature = transaction_dict['signature'])
+        return Transaction(sender=transaction_dict['sender_pub_key'],address=transaction_dict['address'], amnt = transaction_dict['amnt'], note = transaction_dict['note'], signature = transaction_dict['signature'])
