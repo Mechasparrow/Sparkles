@@ -5,20 +5,19 @@ app = Flask(__name__)
 sockets = Sockets(app)
 
 miners = []
+nodes = []
 
 @sockets.route('/miners')
 def miners_socket(ws):
     while not ws.closed:
-        message = ws.receive()
-        print (message)
-        ws.send(message)
+        break
 
 @sockets.route('/wallet')
 def wallet_socket(ws):
     while not ws.closed:
-        message = ws.receive()
-        print (message)
-        ws.send(message)
+        ws.send("terminate")
+
+
 
 if __name__ == "__main__":
     from gevent import pywsgi

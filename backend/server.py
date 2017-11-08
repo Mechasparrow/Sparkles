@@ -4,21 +4,19 @@ from flask_sockets import Sockets
 app = Flask(__name__)
 sockets = Sockets(app)
 
-@sockets.route('/connect')
-def connect_socket(ws):
-    while not ws.closed:
-        message = ws.receive()
-        print (ws)
-
 miners = []
+nodes = []
 
 @sockets.route('/miners')
 def miners_socket(ws):
-    clock = 0
-    miners.append(ws)
     while not ws.closed:
-        print (miners)
-        ws.send("test")
+        break
+
+@sockets.route('/wallet')
+def wallet_socket(ws):
+    while not ws.closed:
+        ws.send("terminate")
+
 
 if __name__ == "__main__":
     from gevent import pywsgi
