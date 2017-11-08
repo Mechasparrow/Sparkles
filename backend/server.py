@@ -22,8 +22,15 @@ def miners_socket(ws):
 @sockets.route('/wallet')
 def wallet_socket(ws):
     while not ws.closed:
-        ws.send("terminate")
+        message = ws.receive()
+        print (message)
 
+        if (message == "wallet connect"):
+            nodes.append(ws)
+        elif (message == "wallet disconnect"):
+            nodes.remove(ws)
+        elif (message == "get nodes"):
+            ws.send(str(len(nodes)))
 
 if __name__ == "__main__":
     from gevent import pywsgi

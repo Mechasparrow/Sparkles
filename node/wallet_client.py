@@ -3,8 +3,7 @@ import _thread
 import time
 
 def on_message(ws, message):
-
-    pass
+    print (message)
 
 def on_error(ws, error):
     print (error)
@@ -14,10 +13,11 @@ def on_close(ws):
 
 def on_open(ws):
     print ("### open ###")
+    ws.send("wallet connect")
 
     def run (*args):
         while (True):
-            mode = input("What would you like to do? (transaction, balance, exit): ")
+            mode = input("What would you like to do? (transaction, balance, exit, nodes): ")
 
             if (mode == "exit"):
                 ws.send("wallet disconnect")
@@ -26,7 +26,9 @@ def on_open(ws):
             elif (mode == "transaction"):
                 print ("beginning transaction...")
                 amnt = input("How much would you like to send?: ")
-
+            elif (mode == "nodes"):
+                ws.send("get nodes")
+                time.sleep(1)
         print ("thread terminating")
 
     _thread.start_new_thread(run, ())
