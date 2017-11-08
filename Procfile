@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet -w 1 "backend.server":app
+web: python "./backend/server.py"
