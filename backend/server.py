@@ -1,20 +1,27 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO
-
-from flask_socketio import send, emit
-import json
+from flask import Flask
+from flask_sockets import Sockets
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+sockets = Sockets(app)
 
-@socketio.on('message')
-def handle_message(message):
-    print(message)
-    emit('message_response', {'data': 'got message'})
+@sockets.route('/connect')
+def connect_socket(ws):
+    while not ws.closed:
+        message = ws.receive()
+        print (ws)
 
-@socketio.on('transaction')
-def handle_transaction(transaction):
-    emit('transaction_response', transaction, broadcast = True)
+miners = []
 
-if __name__ == '__main__':
-    socketio.run(app)
+@sockets.route('/miners')
+def miners_socket(ws):
+    clock = 0
+    miners.append(ws)
+    while not ws.closed:
+        print (miners)
+        ws.send("test")
+
+if __name__ == "__main__":
+    from gevent import pywsgi
+    from geventwebsocket.handler import WebSocketHandler
+    server = pywsgi.WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
+    server.serve_forever()
