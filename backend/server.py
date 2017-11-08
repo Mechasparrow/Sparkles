@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sockets import Sockets
 
 import os
+import json
 
 app = Flask(__name__)
 sockets = Sockets(app)
@@ -23,6 +24,7 @@ def miners_socket(ws):
 def wallet_socket(ws):
     while not ws.closed:
         message = ws.receive()
+        message_decoded = json.loads(message)
         print (message)
 
         if (message == "wallet connect"):
@@ -31,6 +33,8 @@ def wallet_socket(ws):
             nodes.remove(ws)
         elif (message == "get nodes"):
             ws.send(str(len(nodes)))
+        elif (message_decoded['message_type'] == "transaction"):
+            print ("transaction")
 
 if __name__ == "__main__":
     from gevent import pywsgi

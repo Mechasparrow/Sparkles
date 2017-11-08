@@ -1,6 +1,7 @@
 import websocket
 import _thread
 import time
+import json
 
 def on_message(ws, message):
     print (message)
@@ -26,6 +27,21 @@ def on_open(ws):
             elif (mode == "transaction"):
                 print ("beginning transaction...")
                 amnt = input("How much would you like to send?: ")
+                address = input("What is the address of the recipient?: ")
+
+                transaction_data = {
+                    "message_type": "transaction",
+                    "data": {
+                        "amnt": amnt,
+                        "address": address
+                    }
+                }
+
+                transaction_json = json.dumps(transaction_data)
+                ws.send(transaction_json)
+
+
+
             elif (mode == "nodes"):
                 ws.send("get nodes")
                 time.sleep(1)
