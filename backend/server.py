@@ -23,7 +23,9 @@ def miners_socket(ws):
         try:
             data_decoded = json.loads(data)
         except TypeError:
-            miners.remove(ws)
+            if (ws in miners):
+                miners.remove(ws)
+
             print (str(len(miners)) + " active miners")
             break;
 
