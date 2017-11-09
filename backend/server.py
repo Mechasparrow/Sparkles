@@ -39,18 +39,30 @@ def miners_socket(ws):
 @sockets.route('/wallet')
 def wallet_socket(ws):
     while not ws.closed:
-        message = ws.receive()
-        message_decoded = json.loads(message)
-        print (message)
+        data = ws.receive()
 
-        if (message == "wallet connect"):
-            nodes.append(ws)
-        elif (message == "wallet disconnect"):
-            nodes.remove(ws)
-        elif (message == "get nodes"):
-            ws.send(str(len(nodes)))
-        elif (message_decoded['message_type'] == "transaction"):
-            print ("transaction")
+        try:
+            data_decoded = json.loads(data)
+        except TypeError:
+            print ("node disconnected")
+            break;
+
+        if (data_decoded['message_type'] == "connection"):
+            if (data_decoded['connection'] == True):
+                nodes.append(ws)
+            elif (data_decoded['connection'] == False):
+                nodes.remove(ws)
+        elif (data_decoded['message_type'] == "command"):
+            if (data_decoded['command'] == "get_nodes"):
+
+                message_response = {
+                    'message_type': 'message',
+                    'message': 'There is ' + str(len(nodes)) + ' nodes connected.'
+                }
+
+                message_response_json = json.dumps(message_response)
+
+                ws.send(message_response_json)
 
 if __name__ == "__main__":
     from gevent import pywsgi

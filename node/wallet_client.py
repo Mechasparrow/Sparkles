@@ -8,11 +8,14 @@ import sys
 sys.path.append("../CryptoWork")
 
 from transaction import Transaction
-
-
+import crypto_key_gen
 
 def on_message(ws, message):
-    print (message)
+    message_decoded = json.loads(message)
+
+    if (message_decoded['message_type'] == "message"):
+        print (message_decoded['message'])
+
 
 def on_error(ws, error):
     print (error)
@@ -26,16 +29,35 @@ def create_transaction(amnt, address):
 
     pass
 
+def disconnect_message():
+    disconnect = {
+        'message_type': 'connection',
+        'connection': False
+    }
+
+    message_json = json.dumps(disconnect)
+    return message_json
+
+def connect_message():
+    connect = {
+        'message_type': 'connection',
+        'connection': True
+    }
+
+    message_json = json.dumps(connect)
+    return message_json
+
+
 def on_open(ws):
     print ("### open ###")
-    ws.send("wallet connect")
+    ws.send(connect_message())
 
     def run (*args):
         while (True):
             mode = input("What would you like to do? (transaction, balance, exit, nodes): ")
 
             if (mode == "exit"):
-                ws.send("wallet disconnect")
+                ws.send(disconnect_message())
                 ws.close()
                 break
             elif (mode == "transaction"):
@@ -57,7 +79,15 @@ def on_open(ws):
 
 
             elif (mode == "nodes"):
-                ws.send("get nodes")
+                command_data = {
+                    "message_type": "command",
+                    "command": "get_nodes"
+                }
+
+                command_data_json = json.dumps(command_data)
+
+                ws.send(command_data_json)
+
                 time.sleep(1)
         print ("thread terminating")
 
