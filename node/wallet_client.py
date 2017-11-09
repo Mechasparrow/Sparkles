@@ -3,6 +3,14 @@ import _thread
 import time
 import json
 
+import sys
+
+sys.path.append("../CryptoWork")
+
+from transaction import Transaction
+
+
+
 def on_message(ws, message):
     print (message)
 
@@ -11,6 +19,12 @@ def on_error(ws, error):
 
 def on_close(ws):
     print ("### closed ###")
+
+def create_transaction(amnt, address):
+
+
+
+    pass
 
 def on_open(ws):
     print ("### open ###")
