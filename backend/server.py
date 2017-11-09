@@ -18,7 +18,23 @@ except KeyError:
 @sockets.route('/miners')
 def miners_socket(ws):
     while not ws.closed:
-        break
+        data = ws.receive()
+
+        try:
+            data_decoded = json.loads(data)
+        except TypeError:
+            miners.remove(ws)
+            print (str(len(miners)) + " active miners")
+            break;
+
+        if (data_decoded['message_type'] == 'connection'):
+            if (data_decoded['connection'] == True):
+                miners.append(ws)
+                print (str(len(miners)) + " active miners")
+            elif (data_decoded['connection'] == False):
+                miners.remove(ws)
+                print (str(len(miners)) + " active miners")
+
 
 @sockets.route('/wallet')
 def wallet_socket(ws):
