@@ -9,6 +9,8 @@ sys.path.append("../CryptoWork")
 
 from transaction import Transaction
 import crypto_key_gen
+import base64
+
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
@@ -23,11 +25,20 @@ def on_error(ws, error):
 def on_close(ws):
     print ("### closed ###")
 
-def create_transaction(amnt, address):
+def get_keys():
+    sk = crypto_key_gen.generate_key()
+    pk = crypto_key_gen.get_public_key(sk)
 
+    return sk, pk
 
+def create_transaction(sk, pk, amnt, address):
 
-    pass
+    pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
+    transaction = Transaction(pk_hex, address, str(amnt), note = "", private_key = sk)
+    print (transaction)
+    print (transaction.validate_transaction())
+
+    return transaction
 
 def disconnect_message():
     disconnect = {
@@ -62,20 +73,9 @@ def on_open(ws):
                 break
             elif (mode == "transaction"):
                 print ("beginning transaction...")
-                amnt = input("How much would you like to send?: ")
-                address = input("What is the address of the recipient?: ")
 
-                transaction_data = {
-                    "message_type": "transaction",
-                    "data": {
-                        "amnt": amnt,
-                        "address": address
-                    }
-                }
-
-                transaction_json = json.dumps(transaction_data)
-                ws.send(transaction_json)
-
+                sk, pk = get_keys()
+                transaction = create_transaction(sk, pk, 10, "a6b5d3avh10")
 
 
             elif (mode == "nodes"):
