@@ -54,6 +54,10 @@ def wallet_socket(ws):
                 nodes.append(ws)
             elif (data_decoded['connection'] == False):
                 nodes.remove(ws)
+        elif (data_decoded['message_type'] == "transaction"):
+            for miner in miners:
+                miner.send(data)
+
         elif (data_decoded['message_type'] == "command"):
             if (data_decoded['command'] == "get_nodes"):
 

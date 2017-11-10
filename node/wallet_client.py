@@ -35,8 +35,6 @@ def create_transaction(sk, pk, amnt, address):
 
     pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
     transaction = Transaction(pk_hex, address, str(amnt), note = "", private_key = sk)
-    print (transaction)
-    print (transaction.validate_transaction())
 
     return transaction
 
@@ -76,6 +74,15 @@ def on_open(ws):
 
                 sk, pk = get_keys()
                 transaction = create_transaction(sk, pk, 10, "a6b5d3avh10")
+
+                transaction_data = {
+                    "message_type": "transaction",
+                    "data": str(transaction)
+                }
+
+                transaction_data_json = json.dumps(transaction_data)
+
+                ws.send(transaction_data_json)
 
 
             elif (mode == "nodes"):

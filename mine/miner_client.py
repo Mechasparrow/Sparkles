@@ -3,8 +3,23 @@ import _thread
 import time
 import json
 
+import sys
+
+sys.path.append("../CryptoWork")
+sys.path.append("../node")
+
+from transaction import Transaction
+
 def on_message(ws, message):
-    print (message)
+    message_decoded = json.loads(message)
+    if (message_decoded['message_type'] == 'transaction'):
+        transaction_json = message_decoded['data']
+        transaction = Transaction.from_json(transaction_json)
+        if (transaction.validate_transaction() == True):
+            create_block(transaction)
+
+def create_block(transaction):
+    print ("mining block...")
 
 def on_error(ws, error):
     print (error)
