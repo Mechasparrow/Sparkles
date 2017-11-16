@@ -1,0 +1,53 @@
+import json
+import hashlib
+import base64
+
+import sys
+
+sys.path.append("../CryptoWork")
+
+import crypto_key_gen
+
+class Reward:
+
+    def __init__(self, recipient, amnt, private_key = None, signature = None):
+        self.recipient = recipient
+        self.amnt = amnt
+        self.signature = signature
+
+        if (signature == None):
+            self.generate_signature(private_key)
+
+    def __dict__(self):
+        reward_dict = {
+            "recipient": str(self.recipient),
+            "amnt": str(self.amnt),
+            "signature": str(self.signature)
+        }
+
+        return reward_dict
+
+    def __str__(self):
+        reward_dict = self.__dict__()
+        reward_json = json.dumps(reward_dict)
+        return reward_json
+
+    def generate_signature(self, private_key):
+        hash_string = self.get_hash().encode('utf-8')
+        signature = crypto_key_gen.sign_message(private_key, hash_string)
+        b16_signature = base64.b16encode(signature).decode('utf-8')
+        self.signature = b16_signature
+        return b16_signature
+
+    def validate_reward(self):
+        signature = base64.b16decode(self.signature)
+        reward_hash = self.get_hash()
+        public_key = crypto_key_gen.from_publix_hex(self.sender_pub_key)
+        signature_valid = crypto_key_gen.validate_signature(public_key, signature, reward_hash)
+        return signature_valid
+
+    def get_hash(self):
+        hash_pre_string = str(self.recipient) + str(self.amnt)
+        m = hashlib.sha256()
+        m.update(hash_pre_string.encode('utf-8'))
+        return m.hexdigest()
