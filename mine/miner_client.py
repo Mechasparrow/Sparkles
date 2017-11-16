@@ -3,7 +3,6 @@ import _thread
 import time
 import json
 
-
 import hashlib
 import datetime as date
 
@@ -15,6 +14,18 @@ sys.path.append("../node")
 
 from transaction import Transaction
 from block import Block
+from reward import Reward
+
+def get_miner_address(sk):
+
+    pk = crypto_key_gen.get_public_key(sk)
+    pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
+
+    return pk_hex
+
+def get_miner_secret():
+    sk = crypto_key_gen.generate_key()
+    return sk
 
 def header_string(index, prev_hash, data, timestamp, nonce):
     return str(index) + str(prev_hash) + str(data) + str(timestamp) + str(nonce)
@@ -57,7 +68,12 @@ def on_message(ws, message):
 def create_block(transaction):
     print ("mining block...")
 
-    data = [str(transaction)]
+    miner_secret = get_miner_secret()
+    miner_address = get_miner_address()
+
+    reward = Reward(miner_address, 10, private_key = miner_secret )
+
+    data = [str(transaction), str(reward)]
 
     block_data = {}
     block_data['index'] = 1
