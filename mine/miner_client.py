@@ -15,6 +15,8 @@ sys.path.append("../node")
 from transaction import Transaction
 from block import Block
 from reward import Reward
+import crypto_key_gen
+import base64
 
 def get_miner_address(sk):
 
@@ -69,7 +71,7 @@ def create_block(transaction):
     print ("mining block...")
 
     miner_secret = get_miner_secret()
-    miner_address = get_miner_address()
+    miner_address = get_miner_address(miner_secret)
 
     reward = Reward(miner_address, 10, private_key = miner_secret )
 
