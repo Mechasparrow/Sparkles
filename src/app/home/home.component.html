@@ -1,3 +1,8 @@
-<p>
-  home works!
-</p>
+<div class = "container-fluid">
+  <h1 class = "text-center">Welcome to the Sparkles Wallet</h1>
+  <p class = "text-center">What would you like to do?</p>
+
+  <p>Connected: {{connected}}</p>
+  <button (click) = "sendTransaction()" class = "btn btn-primary btn-block">Send Transaction</button>
+  <button (click) = "disconnectWallet()" class = "btn btn-danger btn-block">Disconnect</button>
+</div>
