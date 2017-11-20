@@ -1,4 +1,5 @@
 import {endpoint} from './server-endpoint';
+import {Connection} from './connection';
 
 export class SparkleComm {
 
