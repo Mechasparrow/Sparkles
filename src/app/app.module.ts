@@ -6,16 +6,20 @@ import { AppComponent } from './app.component';
 
 import {RouterModule, Router, Routes} from '@angular/router';
 import { HomeComponent} from './home/home.component';
+import { TransactionComponent } from './transaction/transaction.component';
+
+import { ServercommService } from './servercomm.service';
 
 const appRoutes: Routes = [
-  {path: '', component: HomeComponent}
+  {path: '', component: HomeComponent},
+  {path: 'transaction', component: TransactionComponent}
 ]
-
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    TransactionComponent
   ],
   imports: [
     BrowserModule,
@@ -24,7 +28,7 @@ const appRoutes: Routes = [
       {enableTracing: true}
     )
   ],
-  providers: [],
+  providers: [ServercommService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

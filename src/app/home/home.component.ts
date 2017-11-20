@@ -3,6 +3,12 @@ import { Component, OnInit } from '@angular/core';
 //Import the websocket comm
 import {SparkleComm} from '../../lib/server-comm';
 
+//Import services
+import {ServercommService} from '../servercomm.service';
+
+//Routing
+import {Router, ActivatedRoute, ParamMap} from '@angular/router';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -14,7 +20,10 @@ export class HomeComponent implements OnInit {
 
   public wallet_comm:SparkleComm = null;
 
-  constructor() {
+  constructor(private comm_service: ServercommService
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {
     this.wallet_comm = new SparkleComm("wallet")
 
     let that = this;
@@ -34,7 +43,8 @@ export class HomeComponent implements OnInit {
   }
 
   sendTransaction() {
-
+    this.comm_service.set_sparkle_comm(this.wallet_comm);
+    this.router.navigate(['/transaction']);
   }
 
   disconnectWallet() {
