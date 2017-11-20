@@ -46,4 +46,18 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  connectWallet() {
+    let that = this;
+    var connection_promise = that.wallet_comm.connect();
+
+    connection_promise.then (function (connection) {
+      if (connection != null) {
+        that.connected = true;
+      }else {
+        that.connected = false;
+      }
+    })
+
+  }
+
 }

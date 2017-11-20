@@ -3,6 +3,10 @@
   <p class = "text-center">What would you like to do?</p>
 
   <p>Connected: {{connected}}</p>
-  <button (click) = "sendTransaction()" class = "btn btn-primary btn-block">Send Transaction</button>
-  <button (click) = "disconnectWallet()" class = "btn btn-danger btn-block">Disconnect</button>
+
+  <button *ngIf = "connected" (click) = "disconnectWallet()" class = "btn btn-danger btn-block">Disconnect</button>
+  <button *ngIf = "!connected" (click) = "connectWallet()" class = "btn btn-success btn-block">Connect</button>
+
+  <button [disabled] = "!connected" (click) = "sendTransaction()" class = "btn btn-primary btn-block">Send Transaction</button>
+
 </div>
