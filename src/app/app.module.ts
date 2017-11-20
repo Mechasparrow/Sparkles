@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 
-import {RouterModule, Router} from '@angular/router';
+import {RouterModule, Router, Routes} from '@angular/router';
 import { HomeComponent} from './home/home.component';
 
 const appRoutes: Routes = [

@@ -22,12 +22,21 @@ export class SparkleComm {
     return this.socket;
   }
 
+  on_open (event, socket) {
+    var connect_message = Connection.connect_message(true);
+    console.log(connect_message)
+    socket.send(connect_message);
+  }
+
   connect() {
     let that = this;
     var connection_promise = new Promise(function (resolve, reject) {
 
       if (that.connection_type == "wallet"){
         that.socket = new WebSocket(endpoint + "/wallet");
+        that.socket.addEventListener('open', function (event) {
+          that.on_open(event, that.socket);
+        });
       }else {
         that.socket = null
       }
@@ -42,6 +51,7 @@ export class SparkleComm {
 
   disconnect() {
 
+    this.socket.send(Connection.disconnect_message(true));
     this.socket.close()
     this.socket = null;
     return this.socket;
