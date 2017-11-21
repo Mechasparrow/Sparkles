@@ -25,4 +25,8 @@ export class TransactionComponent implements OnInit {
   ngOnInit() {
   }
 
+  submitTransaction() {
+    alert("submit transaction");
+  }
+
 }
