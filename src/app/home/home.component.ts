@@ -20,9 +20,9 @@ export class HomeComponent implements OnInit {
 
   public wallet_comm:SparkleComm = null;
 
-  constructor(private comm_service: ServercommService
+  constructor(private comm_service: ServercommService,
     private route: ActivatedRoute,
-    private router: Router,
+    private router: Router
   ) {
     this.wallet_comm = new SparkleComm("wallet")
 
