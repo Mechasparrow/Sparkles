@@ -10,9 +10,10 @@ import crypto_key_gen
 
 class Reward:
 
-    def __init__(self, recipient, amnt, private_key = None, signature = None):
+    def __init__(self, recipient, transaction_amnt, private_key = None, signature = None):
         self.recipient = recipient
-        self.amnt = amnt
+        self.transaction_amnt = transaction_amnt
+        self.reward_amnt = 0.01 * float(transaction_amnt)
         self.signature = signature
 
         if (signature == None):
@@ -21,7 +22,8 @@ class Reward:
     def __dict__(self):
         reward_dict = {
             "recipient": str(self.recipient),
-            "amnt": str(self.amnt),
+            "transaction_amnt": str(self.transaction_amnt),
+            "reward_amnt": str(self.reward_amnt),
             "signature": str(self.signature)
         }
 
@@ -31,6 +33,14 @@ class Reward:
         reward_dict = self.__dict__()
         reward_json = json.dumps(reward_dict)
         return reward_json
+
+    def from_dict(reward_dict):
+        reward = Reward(reward_dict['recipient'], reward_dict['transaction_amnt'], reward_dict['signature'])
+        return reward
+
+    def from_json(reward_json):
+        reward_dict = json.loads(reward_json)
+        return Reward.from_dict(reward_dict)
 
     def generate_signature(self, private_key):
         hash_string = self.get_hash().encode('utf-8')
@@ -47,7 +57,7 @@ class Reward:
         return signature_valid
 
     def get_hash(self):
-        hash_pre_string = str(self.recipient) + str(self.amnt)
+        hash_pre_string = str(self.recipient) + str(self.transaction_amnt)
         m = hashlib.sha256()
         m.update(hash_pre_string.encode('utf-8'))
         return m.hexdigest()
