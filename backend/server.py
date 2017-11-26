@@ -36,6 +36,12 @@ def miners_socket(ws):
             elif (data_decoded['connection'] == False):
                 miners.remove(ws)
                 print (str(len(miners)) + " active miners")
+        elif(data_decoded['message_type'] == 'new_block'):
+            print ('new block!')
+
+            for node in nodes:
+                node.send(data)
+
 
 
 @sockets.route('/wallet')

@@ -17,6 +17,9 @@ def on_message(ws, message):
 
     if (message_decoded['message_type'] == "message"):
         print (message_decoded['message'])
+    elif (message_decoded['message_type'] == "new_block"):
+        print ("New Block Recieved!")
+        
 
 
 def on_error(ws, error):

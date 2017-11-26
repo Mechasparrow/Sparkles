@@ -14,7 +14,7 @@ class BlockChain:
         self.blocks = chain
 
     def find_by_hash(self,hash):
-
+        
         pass
 
     def find_by_index(self, idx):
@@ -42,6 +42,10 @@ class BlockChain:
         chain_dict = self.__dict__()
         chain_json = json.dumps(chain_dict)
         return chain_json
+
+    def add_block(self, block):
+
+        pass
 
     def save_blockchain(self, path):
         blockchain_json = self.__str__()

@@ -65,7 +65,21 @@ def on_message(ws, message):
         transaction_json = message_decoded['data']
         transaction = Transaction.from_json(transaction_json)
         if (transaction.validate_transaction() == True):
-            create_block(transaction)
+            block = create_block(transaction)
+            print ("done mining. Sending block...")
+            block_message_json = block_message(block)
+            ws.send(block_message_json)
+
+def block_message(block):
+
+    block_message = {
+        'message_type': 'new_block',
+        'block': str(block)
+    }
+
+    block_message_json = json.dumps(block_message)
+
+    return block_message_json
 
 def create_block(transaction):
     print ("mining block...")
@@ -75,7 +89,7 @@ def create_block(transaction):
     miner_secret = get_miner_secret()
     miner_address = get_miner_address(miner_secret)
 
-    reward = Reward(miner_address, 10, private_key = miner_secret )
+    reward = Reward(miner_address, 10, block_iteration = iteration, private_key = miner_secret )
 
     data = [str(transaction), str(reward)]
 
@@ -90,7 +104,7 @@ def create_block(transaction):
     mined_block_data = mine(block_data)
 
     new_block = Block.from_dict(mined_block_data)
-    print (new_block)
+    return new_block
 
 def on_error(ws, error):
     print (error)
