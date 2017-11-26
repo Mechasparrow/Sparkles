@@ -36,6 +36,14 @@ class Block:
         block_json = json.dumps(block_dict)
         return block_json
 
+    def load_from_file(block_path):
+
+        block_file = open(block_path, 'rb')
+        block_string = block_file.read()
+
+        block = Block.from_json(block_string)
+        return block
+
     def from_dict(block_dict):
         block = Block(int(block_dict['index']), block_dict['timestamp'], block_dict['data'], block_dict['prev_hash'], block_dict['hash'], int(block_dict['nonce']))
         return block
