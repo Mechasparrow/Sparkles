@@ -12,6 +12,6 @@ pk = crypto_key_gen.get_public_key(sk)
 
 pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
 
-reward = Reward(pk_hex, 10, private_key = sk)
+reward = Reward(pk_hex, 10, block_iteration = 100, private_key = sk)
 
 print (reward)

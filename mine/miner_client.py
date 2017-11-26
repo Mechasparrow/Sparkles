@@ -70,6 +70,8 @@ def on_message(ws, message):
 def create_block(transaction):
     print ("mining block...")
 
+    iteration = 1
+
     miner_secret = get_miner_secret()
     miner_address = get_miner_address(miner_secret)
 

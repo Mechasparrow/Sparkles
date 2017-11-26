@@ -1,6 +1,7 @@
 import json
 import hashlib
 import base64
+import math
 
 import sys
 
@@ -10,11 +11,14 @@ import crypto_key_gen
 
 class Reward:
 
-    def __init__(self, recipient, transaction_amnt, private_key = None, signature = None):
+    def __init__(self, recipient, transaction_amnt, block_iteration, private_key = None, signature = None):
         self.recipient = recipient
         self.transaction_amnt = transaction_amnt
         self.reward_amnt = 0.01 * float(transaction_amnt)
+        self.block_iteration = block_iteration
+        self.block_reward = float("{0:.2f}".format(50.0 / self.block_iteration))
         self.signature = signature
+
 
         if (signature == None):
             self.generate_signature(private_key)
@@ -24,6 +28,8 @@ class Reward:
             "recipient": str(self.recipient),
             "transaction_amnt": str(self.transaction_amnt),
             "reward_amnt": str(self.reward_amnt),
+            "block_reward": str(self.block_reward),
+            "block_iteration": str(self.block_iteration),
             "signature": str(self.signature)
         }
 
@@ -35,7 +41,8 @@ class Reward:
         return reward_json
 
     def from_dict(reward_dict):
-        reward = Reward(reward_dict['recipient'], reward_dict['transaction_amnt'], reward_dict['signature'])
+        reward = Reward(reward_dict['recipient'], reward_dict['transaction_amnt'], reward_dict['block_iteration'], reward_dict['signature'])
+        reward.block_reward = float(reward_dict['block_reward'])
         return reward
 
     def from_json(reward_json):
