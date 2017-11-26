@@ -24,6 +24,21 @@ def validate_signature(public_key, signature, message):
 def sign_message(sk, message):
     return sk.sign(message)
 
+def from_private_pem(path):
+    pem_file = open (path, 'rb')
+    pem = pem_file.read()
+
+    sk = SigningKey.from_pem(pem)
+
+    return sk
+
+def from_public_pem(path):
+    pem_file = open (path, 'rb')
+    pem = pem_file.read()
+
+    pk = VerifyingKey.from_pem(pem)
+    return pk
+
 def save_key(key, path):
     key_pem = key.to_pem()
     pem = open (path, 'wb')
