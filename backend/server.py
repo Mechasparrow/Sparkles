@@ -42,6 +42,8 @@ def miners_socket(ws):
             for node in nodes:
                 node.send(data)
 
+            for miner in miners:
+                miner.send(data)
 
 
 @sockets.route('/wallet')
@@ -53,6 +55,7 @@ def wallet_socket(ws):
             data_decoded = json.loads(data)
         except TypeError:
             print ("node disconnected")
+            nodes.remove(ws)
             break;
 
         if (data_decoded['message_type'] == "connection"):

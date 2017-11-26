@@ -31,6 +31,7 @@ def mine(block_dict, NUM_ZEROS=4):
         print (block_hash)
 
         if (str(block_hash[0:NUM_ZEROS]) == '0' * NUM_ZEROS):
+            mine_block_dict['hash'] = block_hash
             break
 
         mine_block_dict['nonce'] = mine_block_dict['nonce'] + 1

@@ -11,12 +11,28 @@ import sys
 sys.path.append("../CryptoWork")
 sys.path.append("../block")
 sys.path.append("../node")
+sys.path.append("../blockchain_lib")
 
 from transaction import Transaction
+from blockchain import BlockChain
 from block import Block
 from reward import Reward
 import crypto_key_gen
 import base64
+
+blockchain = BlockChain([])
+
+def load_blockchain():
+
+    try:
+        blockchain = BlockChain.load_blockchain('./blockchain/blockchain.json')
+    except FileNotFoundError:
+        blocks = []
+        genesis_block = Block.load_from_file('./genesis_block/genesis_block.json')
+        blocks.append(genesis_block)
+        blockchain = BlockChain(blocks)
+
+    return blockchain
 
 def get_miner_address(sk):
 
@@ -69,6 +85,17 @@ def on_message(ws, message):
             print ("done mining. Sending block...")
             block_message_json = block_message(block)
             ws.send(block_message_json)
+    elif (message_decoded['message_type'] == 'new_block'):
+        print ("new block!")
+
+        block_json = message_decoded['block']
+        block = Block.from_json(block_json)
+
+        blockchain.blocks.append(block)
+
+        print (blockchain)
+
+        blockchain.save_blockchain('./blockchain/blockchain.json')
 
 def block_message(block):
 
@@ -84,7 +111,10 @@ def block_message(block):
 def create_block(transaction):
     print ("mining block...")
 
-    iteration = 1
+
+    iteration = len(blockchain.blocks)
+
+    prev_block = blockchain.blocks[iteration - 1]
 
     miner_secret = get_miner_secret()
     miner_address = get_miner_address(miner_secret)
@@ -94,10 +124,10 @@ def create_block(transaction):
     data = [str(transaction), str(reward)]
 
     block_data = {}
-    block_data['index'] = 1
+    block_data['index'] = iteration
     block_data['timestamp'] = date.datetime.now()
     block_data['data'] = str(data)
-    block_data['prev_hash'] = None
+    block_data['prev_hash'] = prev_block.hash
     block_data['hash'] = None
     block_data['nonce'] = 0
 
@@ -141,6 +171,9 @@ if __name__ == "__main__":
         on_error = on_error,
         on_close = on_close
     )
+
+    blockchain = load_blockchain()
+    print (blockchain)
 
     ws.on_open = on_open
     ws.run_forever()
