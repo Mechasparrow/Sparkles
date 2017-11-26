@@ -105,3 +105,6 @@ venv.bak/
 
 /node/keys/public.pem
 /node/keys/secret.pem
+
+/mine/keys/public.pem
+/mine/keys/secret.pem
