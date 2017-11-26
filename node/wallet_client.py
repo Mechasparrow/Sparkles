@@ -59,6 +59,10 @@ def connect_message():
 
 def on_open(ws):
     print ("### open ###")
+
+    public_key = crypto_key_gen.from_public_pem('./keys/public.pem')
+    private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
+
     ws.send(connect_message())
 
     def run (*args):
@@ -72,7 +76,7 @@ def on_open(ws):
             elif (mode == "transaction"):
                 print ("beginning transaction...")
 
-                sk, pk = get_keys()
+                sk, pk = private_key, public_key
                 transaction = create_transaction(sk, pk, 10, "a6b5d3avh10")
 
                 transaction_data = {
