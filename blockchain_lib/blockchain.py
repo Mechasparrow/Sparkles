@@ -43,6 +43,24 @@ class BlockChain:
         chain_json = json.dumps(chain_dict)
         return chain_json
 
+    def save_blockchain(self, path):
+        blockchain_json = self.__str__()
+        blockchain_file = open(path, 'wb')
+        blockchain_file.write(blockchain_json.encode('utf-8'))
+        blockchain_file.close()
+
+        print ("saved blockchain")
+
+    def load_blockchain(path):
+
+        blockchain_file = open(path, 'rb')
+
+        blockchain_json = blockchain_file.read().decode('utf-8')
+
+        blockchain = BlockChain.from_json(blockchain_json)
+
+        return blockchain
+
     def from_dict(blockchain_dict):
 
         blocks = []
