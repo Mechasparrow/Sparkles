@@ -3,7 +3,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 from transaction import Transaction
 
 import sys
-
+    
 sys.path.append("../CryptoWork")
 
 import crypto_key_gen

@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+/node/keys/public.pem
+/node/keys/secret.pem
