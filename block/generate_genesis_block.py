@@ -37,9 +37,20 @@ def mine(block_dict, NUM_ZEROS=4):
 
     return mine_block_dict
 
-genesis_block_data = mine(genesis_block_data)
+def save_block(block, path):
+
+    block_file = open(path, 'wb')
+    block_json = str(block)
+
+    block_file.write(block_json.encode('utf-8'))
+    block_file.close()
+
+    print ("finished saving block")
+
+
+genesis_block_data = mine(genesis_block_data, 4)
 
 
 genesis_block = Block.from_dict(genesis_block_data)
-print (genesis_block)
-print (genesis_block.create_self_hash())
+
+save_block(genesis_block, './genesis_block.json')
