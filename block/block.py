@@ -39,7 +39,7 @@ class Block:
     def load_from_file(block_path):
 
         block_file = open(block_path, 'rb')
-        block_string = block_file.read()
+        block_string = block_file.read().decode('utf-8')
 
         block = Block.from_json(block_string)
         return block
