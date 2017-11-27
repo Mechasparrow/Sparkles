@@ -111,7 +111,6 @@ def block_message(block):
 def create_block(transaction):
     print ("mining block...")
 
-
     iteration = len(blockchain.blocks)
 
     prev_block = blockchain.blocks[iteration - 1]
@@ -119,7 +118,7 @@ def create_block(transaction):
     miner_secret = get_miner_secret()
     miner_address = get_miner_address(miner_secret)
 
-    reward = Reward(miner_address, 10, block_iteration = iteration, private_key = miner_secret )
+    reward = Reward(miner_address, transaction.amnt, block_iteration = iteration, private_key = miner_secret )
 
     data = [str(transaction), str(reward)]
 

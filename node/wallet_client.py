@@ -6,11 +6,28 @@ import json
 import sys
 
 sys.path.append("../CryptoWork")
+sys.path.append("../block")
+sys.path.append("../blockchain_lib")
 
 from transaction import Transaction
+from blockchain import BlockChain
+from block import Block
+
 import crypto_key_gen
 import base64
 
+blockchain = BlockChain([])
+
+def load_blockchain():
+    try:
+        blockchain = BlockChain.load_blockchain('./blockchain/blockchain.json')
+    except FileNotFoundError:
+        blocks = []
+        genesis_block = Block.load_from_file('./genesis_block/genesis_block.json')
+        blocks.append(genesis_block)
+        blockchain = BlockChain(blocks)
+
+    return blockchain
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
@@ -19,8 +36,17 @@ def on_message(ws, message):
         print (message_decoded['message'])
     elif (message_decoded['message_type'] == "new_block"):
         print ("New Block Recieved!")
-        
 
+        block_json = message_decoded['block']
+        block = Block.from_json(block_json)
+
+        blockchain.blocks.append(block)
+
+        print (blockchain)
+
+        blockchain.save_blockchain('./blockchain/blockchain.json')
+
+        print()
 
 def on_error(ws, error):
     print (error)
@@ -114,6 +140,9 @@ if __name__ == "__main__":
         on_error = on_error,
         on_close = on_close
     )
+
+    blockchain = load_blockchain()
+    print (blockchain)
 
     ws.on_open = on_open
     ws.run_forever()
