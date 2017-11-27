@@ -1,5 +1,6 @@
 import websocket
 import _thread
+import threading
 import time
 import json
 
@@ -35,6 +36,7 @@ def on_message(ws, message):
     if (message_decoded['message_type'] == "message"):
         print (message_decoded['message'])
     elif (message_decoded['message_type'] == "new_block"):
+        print ()
         print ("New Block Recieved!")
 
         block_json = message_decoded['block']
@@ -42,11 +44,14 @@ def on_message(ws, message):
 
         blockchain.blocks.append(block)
 
-        print (blockchain)
+        print (block)
 
         blockchain.save_blockchain('./blockchain/blockchain.json')
 
-        print()
+        print ()
+
+        sys.stdout.write('What would you like to do? (transaction, balance, exit, nodes): ')
+        sys.stdout.flush()
 
 def on_error(ws, error):
     print (error)
@@ -94,8 +99,11 @@ def on_open(ws):
 
     ws.send(connect_message())
 
-    def run (*args):
+    ended = False
+
+    def run ():
         while (True):
+
             mode = input("What would you like to do? (transaction, balance, exit, nodes): ")
 
             if (mode == "exit"):
@@ -117,7 +125,6 @@ def on_open(ws):
 
                 ws.send(transaction_data_json)
 
-
             elif (mode == "nodes"):
                 command_data = {
                     "message_type": "command",
@@ -127,11 +134,11 @@ def on_open(ws):
                 command_data_json = json.dumps(command_data)
 
                 ws.send(command_data_json)
-
                 time.sleep(1)
         print ("thread terminating")
 
-    _thread.start_new_thread(run, ())
+    client_thread = threading.Thread(target=run)
+    client_thread.start()
 
 if __name__ == "__main__":
     websocket.enableTrace(True)
