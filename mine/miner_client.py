@@ -1,5 +1,5 @@
 import websocket
-import _thread
+import threaading
 import time
 import json
 
