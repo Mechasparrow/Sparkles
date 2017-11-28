@@ -44,10 +44,6 @@ def get_balance(pk_hex):
             blk_transaction = Transaction.from_json(blk_data[0])
             blk_reward = Reward.from_json(blk_data[1])
 
-            print (blk_transaction.address)
-            print (blk_reward.recipient)
-            print (pk_hex)
-
             if (blk_transaction.sender_pub_key == pk_hex):
                 balance = balance - float(blk_transaction.amnt)
                 balance = balance - float(blk_reward.reward_amnt)
@@ -59,9 +55,12 @@ def get_balance(pk_hex):
                 balance = balance + blk_reward.block_reward
 
         except json.decoder.JSONDecodeError:
-            print ("not a valid transaction block")
+            continue
 
     return balance
+
+def prompt_string():
+    return "What would you like to do? (transaction, address, balance, exit, nodes): "
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
@@ -83,7 +82,7 @@ def on_message(ws, message):
 
         print ()
 
-        sys.stdout.write('What would you like to do? (transaction, balance, exit, nodes): ')
+        sys.stdout.write(prompt_string())
         sys.stdout.flush()
 
 def on_error(ws, error):
@@ -137,7 +136,7 @@ def on_open(ws):
     def run ():
         while (True):
 
-            mode = input("What would you like to do? (transaction, balance, exit, nodes): ")
+            mode = input(prompt_string())
 
             if (mode == "exit"):
                 ws.send(disconnect_message())
@@ -172,6 +171,11 @@ def on_open(ws):
                     transaction_data_json = json.dumps(transaction_data)
 
                     ws.send(transaction_data_json)
+
+            elif (mode == "address"):
+                pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
+                print ("Your address below:")
+                print (pk_hex)
 
             elif (mode == "nodes"):
                 command_data = {
