@@ -52,6 +52,9 @@ def get_balance(pk_hex):
                 balance = balance - float(blk_transaction.amnt)
                 balance = balance - float(blk_reward.reward_amnt)
 
+            if (blk_transaction.address == pk_hex):
+                balance = balance + float(blk_transaction.amnt)
+
             if (blk_reward.recipient == pk_hex):
                 balance = balance + blk_reward.block_reward
 
@@ -144,16 +147,31 @@ def on_open(ws):
                 print ("beginning transaction...")
 
                 sk, pk = private_key, public_key
-                transaction = create_transaction(sk, pk, 10, "a6b5d3avh10")
 
-                transaction_data = {
-                    "message_type": "transaction",
-                    "data": str(transaction)
-                }
+                address = input("What address do you want to send to?: ")
+                amnt = float(input("How much would you like to send?: "))
 
-                transaction_data_json = json.dumps(transaction_data)
+                pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
+                balance = get_balance(pk_hex)
 
-                ws.send(transaction_data_json)
+                commission = amnt * 0.01
+                total_amnt = amnt + commission
+
+                print ("total amnt being sent is " + str(total_amnt))
+
+                if ((balance - total_amnt) < 0):
+                    print ("can't send payment. Insufficient funds")
+                else:
+                    transaction = create_transaction(sk, pk, amnt, address)
+
+                    transaction_data = {
+                        "message_type": "transaction",
+                        "data": str(transaction)
+                    }
+
+                    transaction_data_json = json.dumps(transaction_data)
+
+                    ws.send(transaction_data_json)
 
             elif (mode == "nodes"):
                 command_data = {
