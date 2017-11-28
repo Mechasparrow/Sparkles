@@ -1,5 +1,5 @@
 import websocket
-import threaading
+import threading
 import time
 import json
 
@@ -34,15 +34,15 @@ def load_blockchain():
 
     return blockchain
 
-def get_miner_address(sk):
+def get_miner_address():
 
-    pk = crypto_key_gen.get_public_key(sk)
+    pk = crypto_key_gen.from_public_pem('./keys/public.pem')
     pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
 
     return pk_hex
 
 def get_miner_secret():
-    sk = crypto_key_gen.generate_key()
+    sk = crypto_key_gen.from_private_pem('./keys/secret.pem')
     return sk
 
 def header_string(index, prev_hash, data, timestamp, nonce):
@@ -116,11 +116,11 @@ def create_block(transaction):
     prev_block = blockchain.blocks[iteration - 1]
 
     miner_secret = get_miner_secret()
-    miner_address = get_miner_address(miner_secret)
+    miner_address = get_miner_address()
 
     reward = Reward(miner_address, transaction.amnt, block_iteration = iteration, private_key = miner_secret )
 
-    data = [str(transaction), str(reward)]
+    data = json.dumps([str(transaction), str(reward)])
 
     block_data = {}
     block_data['index'] = iteration

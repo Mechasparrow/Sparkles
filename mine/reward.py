@@ -41,7 +41,7 @@ class Reward:
         return reward_json
 
     def from_dict(reward_dict):
-        reward = Reward(reward_dict['recipient'], reward_dict['transaction_amnt'], reward_dict['block_iteration'], reward_dict['signature'])
+        reward = Reward(reward_dict['recipient'], reward_dict['transaction_amnt'], int(reward_dict['block_iteration']), signature= reward_dict['signature'])
         reward.block_reward = float(reward_dict['block_reward'])
         return reward
 

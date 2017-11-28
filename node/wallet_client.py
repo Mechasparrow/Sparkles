@@ -8,8 +8,10 @@ import sys
 sys.path.append("../CryptoWork")
 sys.path.append("../block")
 sys.path.append("../blockchain_lib")
+sys.path.append("../mine")
 
 from transaction import Transaction
+from reward import Reward
 from blockchain import BlockChain
 from block import Block
 
@@ -28,6 +30,35 @@ def load_blockchain():
         blockchain = BlockChain(blocks)
 
     return blockchain
+
+def get_balance(pk_hex):
+
+    balance = 0.0
+
+    # TODO implement balance loading
+
+    for block in blockchain.blocks:
+        try:
+            blk_data = json.loads(block.data)
+
+            blk_transaction = Transaction.from_json(blk_data[0])
+            blk_reward = Reward.from_json(blk_data[1])
+
+            print (blk_transaction.address)
+            print (blk_reward.recipient)
+            print (pk_hex)
+
+            if (blk_transaction.sender_pub_key == pk_hex):
+                balance = balance - float(blk_transaction.amnt)
+                balance = balance - float(blk_reward.reward_amnt)
+
+            if (blk_reward.recipient == pk_hex):
+                balance = balance + blk_reward.block_reward
+
+        except json.decoder.JSONDecodeError:
+            print ("not a valid transaction block")
+
+    return balance
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
@@ -134,6 +165,11 @@ def on_open(ws):
 
                 ws.send(command_data_json)
                 time.sleep(1)
+            elif (mode == "balance"):
+                pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
+                balance = get_balance(pk_hex)
+                print ("Your balance is " + str(balance))
+
         print ("thread terminating")
 
     client_thread = threading.Thread(target=run)
