@@ -53,5 +53,8 @@ class Block:
         block = Block.from_dict(block_dict)
         return block
 
-    def valid_block(self):
-        pass
+    def valid_block(self, NUM_OF_ZEROS = 4):
+        if (str(self.hash[0:NUM_OF_ZEROS]) == '0' * NUM_OF_ZEROS):
+            return True
+        else:
+            return False

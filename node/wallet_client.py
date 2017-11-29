@@ -23,6 +23,8 @@ blockchain = BlockChain([])
 def load_blockchain():
     try:
         blockchain = BlockChain.load_blockchain('./blockchain/blockchain.json')
+        if (blockchain.validate_chain()):
+            print ("BlockChain is valid")
     except FileNotFoundError:
         blocks = []
         genesis_block = Block.load_from_file('./genesis_block/genesis_block.json')
@@ -206,7 +208,6 @@ if __name__ == "__main__":
     )
 
     blockchain = load_blockchain()
-    print (blockchain)
 
     ws.on_open = on_open
     ws.run_forever()
