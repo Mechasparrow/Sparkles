@@ -48,8 +48,6 @@ class BlockChain:
         prev_block_hash = "None"
 
         for block in self.blocks:
-            print (block.index)
-
             if (block.index == 0):
                 if (block.prev_hash == prev_block_hash and BlockChain.valid_block(block)):
                     prev_block_hash = block.hash
