@@ -87,6 +87,18 @@ def on_message(ws, message):
             print ("done mining. Sending block...")
             block_message_json = block_message(block)
             ws.send(block_message_json)
+    elif (message_decoded['message_type'] == "sync_request"):
+        print ("blockchain requested")
+
+        blockchain_message = {
+            'message_type': 'blockchain_upload',
+            'blockchain': str(blockchain)
+        }
+
+        blockchain_message_json = json.dumps(blockchain_message)
+
+        ws.send(blockchain_message_json)
+
     elif (message_decoded['message_type'] == 'new_block'):
         print ("new block!")
 

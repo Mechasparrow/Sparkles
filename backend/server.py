@@ -44,6 +44,13 @@ def miners_socket(ws):
 
             for miner in miners:
                 miner.send(data)
+        elif(data_decoded['message_type'] == 'blockchain_upload'):
+            print ("blockchain sync")
+
+            blockchain = data_decoded['blockchain']
+
+            print (blockchain)
+
 
 
 @sockets.route('/wallet')
@@ -80,6 +87,19 @@ def wallet_socket(ws):
                 message_response_json = json.dumps(message_response)
 
                 ws.send(message_response_json)
+        elif (data_decoded['message_type'] == "sync"):
+
+            awaiting_sync.append(ws)
+
+            sync_message = {
+                'message_type': 'sync_request',
+            }
+
+            sync_message_json = json.dumps(sync_message)
+
+            for miner in miners:
+                miner.send(sync_message_json)
+
 
 if __name__ == "__main__":
     from gevent import pywsgi

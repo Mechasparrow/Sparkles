@@ -136,6 +136,13 @@ def connect_message():
     message_json = json.dumps(connect)
     return message_json
 
+def sync_message():
+    sync = {
+        'message_type': 'sync',
+    }
+
+    message_json = json.dumps(sync)
+    return message_json
 
 def on_open(ws):
     print ("### open ###")
@@ -144,6 +151,7 @@ def on_open(ws):
     private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
 
     ws.send(connect_message())
+    ws.send(sync_message())
 
     ended = False
 

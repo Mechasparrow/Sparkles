@@ -64,6 +64,22 @@ class BlockChain:
 
         return valid_block
 
+    def sync_blockchain(chain_1, chain_2):
+
+        chain_1_valid = chain_1.validate_chain()
+        chain_2_valid = chain_2.validate_chain()
+
+        if (chain_1_valid == True and chain_2_valid == False):
+            return chain_1
+        elif (chain_1_valid == False and chain_2_valid == True):
+            return chain_2
+        else:
+            if len(chain_1) > len(chain_2):
+                return chain_1
+            elif len(chain_2) > len(chain_1):
+                return chain_2
+
+
     def check_balance(self, spk_addr):
 
         pass
