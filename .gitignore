@@ -109,5 +109,5 @@ venv.bak/
 /mine/keys/public.pem
 /mine/keys/secret.pem
 
-/node/blockchain
-/mine/blockchain
+/node/blockchain/blockchain.json
+/mine/blockchain/blockchain.json
