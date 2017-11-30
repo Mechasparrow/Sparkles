@@ -26,15 +26,20 @@ def miners_socket(ws):
             if (ws in miners):
                 miners.remove(ws)
 
+            if (ws in nodes):
+                nodes.remove(ws)
+
             print (str(len(miners)) + " active miners")
             break;
 
         if (data_decoded['message_type'] == 'connection'):
             if (data_decoded['connection'] == True):
                 miners.append(ws)
+                nodes.append(ws)
                 print (str(len(miners)) + " active miners")
             elif (data_decoded['connection'] == False):
                 miners.remove(ws)
+                nodes.remove(ws)
                 print (str(len(miners)) + " active miners")
         elif(data_decoded['message_type'] == 'new_block'):
             print ('new block!')
@@ -42,14 +47,24 @@ def miners_socket(ws):
             for node in nodes:
                 node.send(data)
 
-            for miner in miners:
-                miner.send(data)
+        elif (data_decoded['message_type'] == "sync"):
+
+            sync_message = {
+                'message_type': 'sync_request',
+            }
+
+            sync_message_json = json.dumps(sync_message)
+
+            for node in nodes:
+                node.send(sync_message_json)
+
         elif(data_decoded['message_type'] == 'blockchain_upload'):
             print ("blockchain sync")
 
             blockchain = data_decoded['blockchain']
 
-            print (blockchain)
+            for node in nodes:
+                node.send(data)
 
 
 
@@ -62,7 +77,10 @@ def wallet_socket(ws):
             data_decoded = json.loads(data)
         except TypeError:
             print ("node disconnected")
-            nodes.remove(ws)
+
+            if ws in nodes:
+                nodes.remove(ws)
+
             break;
 
         if (data_decoded['message_type'] == "connection"):
@@ -89,16 +107,14 @@ def wallet_socket(ws):
                 ws.send(message_response_json)
         elif (data_decoded['message_type'] == "sync"):
 
-            awaiting_sync.append(ws)
-
             sync_message = {
                 'message_type': 'sync_request',
             }
 
             sync_message_json = json.dumps(sync_message)
 
-            for miner in miners:
-                miner.send(sync_message_json)
+            for node in nodes:
+                node.send(sync_message_json)
 
 
 if __name__ == "__main__":

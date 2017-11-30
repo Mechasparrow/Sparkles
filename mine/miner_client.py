@@ -79,6 +79,9 @@ def mine(block_dict, NUM_ZEROS=4):
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
+
+    global blockchain
+
     if (message_decoded['message_type'] == 'transaction'):
         transaction_json = message_decoded['data']
         transaction = Transaction.from_json(transaction_json)
@@ -98,6 +101,17 @@ def on_message(ws, message):
         blockchain_message_json = json.dumps(blockchain_message)
 
         ws.send(blockchain_message_json)
+
+    elif (message_decoded['message_type'] == "blockchain_upload"):
+        recieved_blockchain = BlockChain.from_json(message_decoded['blockchain'])
+
+        new_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
+
+        blockchain = new_blockchain
+
+        blockchain.save_blockchain('./blockchain/blockchain.json')
+
+        print ()
 
     elif (message_decoded['message_type'] == 'new_block'):
         print ("new block!")
@@ -173,6 +187,13 @@ def on_close(ws):
     ws.send(close_message_json)
 
     print ("### closed ###")
+def sync_message():
+    sync = {
+        'message_type': 'sync',
+    }
+
+    message_json = json.dumps(sync)
+    return message_json
 
 def on_open(ws):
     print ("### open ###")
@@ -185,7 +206,7 @@ def on_open(ws):
     open_message_json = json.dumps(open_message)
 
     ws.send(open_message_json)
-
+    ws.send(sync_message())
 
 if __name__ == "__main__":
     websocket.enableTrace(True)

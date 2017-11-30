@@ -69,8 +69,42 @@ def prompt_string():
 def on_message(ws, message):
     message_decoded = json.loads(message)
 
+    global blockchain
+
     if (message_decoded['message_type'] == "message"):
         print (message_decoded['message'])
+    elif (message_decoded['message_type'] == "blockchain_upload"):
+        recieved_blockchain = BlockChain.from_json(message_decoded['blockchain'])
+
+
+        new_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
+
+        blockchain = new_blockchain
+
+        blockchain.save_blockchain('./blockchain/blockchain.json')
+
+        print ()
+
+        sys.stdout.write(prompt_string())
+        sys.stdout.flush()
+
+    elif (message_decoded['message_type'] == "sync_request"):
+        print ("blockchain requested")
+
+        blockchain_message = {
+            'message_type': 'blockchain_upload',
+            'blockchain': str(blockchain)
+        }
+
+        blockchain_message_json = json.dumps(blockchain_message)
+
+        ws.send(blockchain_message_json)
+
+        print ()
+
+        sys.stdout.write(prompt_string())
+        sys.stdout.flush()
+
     elif (message_decoded['message_type'] == "new_block"):
         print ()
         print ("New Block Recieved!")

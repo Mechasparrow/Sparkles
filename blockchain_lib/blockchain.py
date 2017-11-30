@@ -74,10 +74,14 @@ class BlockChain:
         elif (chain_1_valid == False and chain_2_valid == True):
             return chain_2
         else:
+            print ("comparing")
+
             if len(chain_1) > len(chain_2):
                 return chain_1
             elif len(chain_2) > len(chain_1):
                 return chain_2
+            else:
+                return chain_1
 
 
     def check_balance(self, spk_addr):
