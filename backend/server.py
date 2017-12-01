@@ -116,6 +116,13 @@ def wallet_socket(ws):
             for node in nodes:
                 node.send(sync_message_json)
 
+        elif (data_decoded['message_type'] == "blockchain_upload"):
+            print ("blockchain sync")
+
+            blockchain = data_decoded['blockchain']
+
+            for node in nodes:
+                node.send(data)
 
 if __name__ == "__main__":
     from gevent import pywsgi
