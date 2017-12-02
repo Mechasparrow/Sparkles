@@ -78,17 +78,9 @@ def on_message(ws, message):
         print ("recieved blockchain")
         recieved_blockchain = BlockChain.from_json(message_decoded['blockchain'])
 
-        print (recieved_blockchain)
-
-        print ()
-
-
-        print (recieved_blockchain.validate_chain())
-
         new_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
         print ()
-        print (new_blockchain)
-
+        
         blockchain = new_blockchain
 
         blockchain.save_blockchain('./blockchain/blockchain.json')

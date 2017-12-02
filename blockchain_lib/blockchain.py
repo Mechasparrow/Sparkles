@@ -138,7 +138,9 @@ class BlockChain:
             block = Block.from_json(block_string)
             blocks.append(block)
 
-        blockchain = BlockChain(blocks)
+        sorted_blocks = BlockChain.block_sort(blocks)
+
+        blockchain = BlockChain(sorted_blocks)
         return blockchain
 
     def from_json(blockchain_json):
