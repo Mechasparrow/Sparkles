@@ -80,7 +80,7 @@ def on_message(ws, message):
 
         new_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
         print ()
-        
+
         blockchain = new_blockchain
 
         blockchain.save_blockchain('./blockchain/blockchain.json')
@@ -93,14 +93,7 @@ def on_message(ws, message):
     elif (message_decoded['message_type'] == "sync_request"):
         print ("blockchain requested")
 
-        blockchain_message = {
-            'message_type': 'blockchain_upload',
-            'blockchain': str(blockchain)
-        }
-
-        blockchain_message_json = json.dumps(blockchain_message)
-
-        ws.send(blockchain_message_json)
+        ws.send(blockchain_upload_message())
 
         print ()
 
@@ -174,6 +167,17 @@ def connect_message():
     message_json = json.dumps(connect)
     return message_json
 
+def blockchain_upload_message():
+    blockchain_message = {
+        'message_type': 'blockchain_upload',
+        'blockchain': str(blockchain)
+    }
+
+    blockchain_message_json = json.dumps(blockchain_message)
+
+    return blockchain_message_json
+
+
 def sync_message():
     sync = {
         'message_type': 'sync',
@@ -190,6 +194,7 @@ def on_open(ws):
 
     ws.send(connect_message())
     ws.send(sync_message())
+    ws.send(blockchain_upload_message())
 
     ended = False
 

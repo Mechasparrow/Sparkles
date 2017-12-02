@@ -4,11 +4,15 @@ from flask_sockets import Sockets
 import os
 import json
 
+import copy
+
 app = Flask(__name__)
 sockets = Sockets(app)
 
 miners = []
 nodes = []
+
+need_sync = []
 
 try:
     port = int(os.environ["PORT"])
@@ -17,6 +21,7 @@ except KeyError:
 
 @sockets.route('/miners')
 def miners_socket(ws):
+    global need_sync
     while not ws.closed:
         data = ws.receive()
 
@@ -55,7 +60,12 @@ def miners_socket(ws):
 
             sync_message_json = json.dumps(sync_message)
 
+            need_sync.append(ws)
+
             for node in nodes:
+                if (node == ws):
+                    continue
+
                 node.send(sync_message_json)
 
         elif(data_decoded['message_type'] == 'blockchain_upload'):
@@ -66,18 +76,22 @@ def miners_socket(ws):
             print ("miner sent...")
             print (blockchain)
 
+            need_sync_old = copy.copy(need_sync)
 
-            for node in nodes:
-
+            for node in need_sync_old:
                 if (node == ws):
                     print ("same node")
                 else:
                     node.send(data)
+                    need_sync.remove(node)
+
+            print (need_sync)
 
 
 
 @sockets.route('/wallet')
 def wallet_socket(ws):
+    global need_sync
     while not ws.closed:
         data = ws.receive()
 
@@ -121,7 +135,12 @@ def wallet_socket(ws):
 
             sync_message_json = json.dumps(sync_message)
 
+            need_sync.append(ws)
+
             for node in nodes:
+                if (node == ws):
+                    continue
+
                 node.send(sync_message_json)
 
         elif (data_decoded['message_type'] == "blockchain_upload"):
@@ -132,11 +151,16 @@ def wallet_socket(ws):
             print (blockchain)
 
 
-            for node in nodes:
+            need_sync_old = copy.copy(need_sync)
+
+            for node in need_sync_old:
                 if (node == ws):
                     print ("same node")
                 else:
                     node.send(data)
+                    need_sync.remove(node)
+
+            print (need_sync)
 
 if __name__ == "__main__":
     from gevent import pywsgi

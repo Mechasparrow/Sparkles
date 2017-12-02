@@ -75,7 +75,18 @@ def mine(block_dict, NUM_ZEROS=4):
 
     return mine_block_dict
 
+def blockchain_upload_message():
 
+    global blockchain
+
+    blockchain_message = {
+        'message_type': 'blockchain_upload',
+        'blockchain': str(blockchain)
+    }
+
+    blockchain_message_json = json.dumps(blockchain_message)
+
+    return blockchain_message_json
 
 def on_message(ws, message):
     message_decoded = json.loads(message)
@@ -93,14 +104,7 @@ def on_message(ws, message):
     elif (message_decoded['message_type'] == "sync_request"):
         print ("blockchain requested")
 
-        blockchain_message = {
-            'message_type': 'blockchain_upload',
-            'blockchain': str(blockchain)
-        }
-
-        blockchain_message_json = json.dumps(blockchain_message)
-
-        ws.send(blockchain_message_json)
+        ws.send(blockchain_upload_message())
 
     elif (message_decoded['message_type'] == "blockchain_upload"):
         recieved_blockchain = BlockChain.from_json(message_decoded['blockchain'])
@@ -206,6 +210,7 @@ def on_open(ws):
     open_message_json = json.dumps(open_message)
 
     ws.send(open_message_json)
+    ws.send(blockchain_upload_message())
     ws.send(sync_message())
 
 if __name__ == "__main__":
