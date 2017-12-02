@@ -74,10 +74,20 @@ def on_message(ws, message):
     if (message_decoded['message_type'] == "message"):
         print (message_decoded['message'])
     elif (message_decoded['message_type'] == "blockchain_upload"):
+
+        print ("recieved blockchain")
         recieved_blockchain = BlockChain.from_json(message_decoded['blockchain'])
 
+        print (recieved_blockchain)
+
+        print ()
+
+
+        print (recieved_blockchain.validate_chain())
 
         new_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
+        print ()
+        print (new_blockchain)
 
         blockchain = new_blockchain
 
@@ -117,6 +127,8 @@ def on_message(ws, message):
 
             temp_blocks.append(block)
             temp_block_chain = BlockChain(temp_blocks)
+
+            print (temp_block_chain)
 
             if (temp_block_chain.validate_chain() == True):
                 print ("valid new blockchain")

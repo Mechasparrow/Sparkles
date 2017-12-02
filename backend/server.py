@@ -63,8 +63,16 @@ def miners_socket(ws):
 
             blockchain = data_decoded['blockchain']
 
+            print ("miner sent...")
+            print (blockchain)
+
+
             for node in nodes:
-                node.send(data)
+
+                if (node == ws):
+                    print ("same node")
+                else:
+                    node.send(data)
 
 
 
@@ -120,9 +128,15 @@ def wallet_socket(ws):
             print ("blockchain sync")
 
             blockchain = data_decoded['blockchain']
+            print ("node sent...")
+            print (blockchain)
+
 
             for node in nodes:
-                node.send(data)
+                if (node == ws):
+                    print ("same node")
+                else:
+                    node.send(data)
 
 if __name__ == "__main__":
     from gevent import pywsgi
