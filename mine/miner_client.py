@@ -23,9 +23,6 @@ import crypto_key_gen
 import base64
 
 blockchain = BlockChain([])
-mining = False
-alt_block = None
-blk_dict = {}
 
 def load_blockchain():
 
@@ -33,8 +30,8 @@ def load_blockchain():
         blockchain = BlockChain.load_blockchain('./blockchain/blockchain.json')
     except FileNotFoundError:
         blocks = []
-        blocks.append(genesis_block)
         genesis_block = Block.load_from_file('./genesis_block/genesis_block.json')
+        blocks.append(genesis_block)
         blockchain = BlockChain(blocks)
 
     return blockchain
@@ -58,55 +55,25 @@ def generate_hash(header_string):
     sha.update(header_string.encode('utf-8'))
     return sha.hexdigest()
 
-def mine(NUM_ZEROS=4):
+def mine(block_dict, NUM_ZEROS=4):
+    mine_block_dict = dict.copy(block_dict)
 
-    global mining
-    global alt_block
-    global blk_dict
-
-    mining = True
-
-
-    blk_dict['nonce'] = int(blk_dict['nonce'])
+    mine_block_dict['nonce'] = int(mine_block_dict['nonce'])
 
     while True:
 
-        block_header_string = header_string(blk_dict['index'], blk_dict['prev_hash'], blk_dict['data'], blk_dict['timestamp'], blk_dict['nonce'])
+        block_header_string = header_string(mine_block_dict['index'], mine_block_dict['prev_hash'], mine_block_dict['data'], mine_block_dict['timestamp'], mine_block_dict['nonce'])
         block_hash = generate_hash(block_header_string)
-
-        if (mining == False):
-            try:
-                alt_blk_data = json.loads(alt_block.data)
-                alt_blk_transaction = Transaction.from_json(alt_blk_data[0])
-
-                mine_blk_data = json.loads(blk_dict['data'])
-                mine_blk_transaction = Transaction.from_json(mine_blk_data[0])
-
-                if (alt_blk_transaction == mine_blk_transaction):
-                    mining = False
-                    alt_block = None
-
-                    print ("ALT BLOCK")
-                    print ("BLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEP")
-                    return None
-                    break
-                else:
-                    print ("Not BLEEEEEEEEEEEEEEEEEEEEEEEEEEP")
-                    mining = True
-                    alt_block = None
-
-            except json.decoder.JSONDecodeError:
-                mining = True
 
         print (block_hash)
 
         if (str(block_hash[0:NUM_ZEROS]) == '0' * NUM_ZEROS):
-            blk_dict['hash'] = block_hash
+            mine_block_dict['hash'] = block_hash
             break
 
-        blk_dict['nonce'] = blk_dict['nonce'] + 1
+        mine_block_dict['nonce'] = mine_block_dict['nonce'] + 1
 
-    return blk_dict
+    return mine_block_dict
 
 def blockchain_upload_message():
 
@@ -126,22 +93,14 @@ def on_message(ws, message):
 
     global blockchain
 
-    global mining
-    global alt_block
-    global blk_dict
-
     if (message_decoded['message_type'] == 'transaction'):
         transaction_json = message_decoded['data']
         transaction = Transaction.from_json(transaction_json)
         if (transaction.validate_transaction() == True):
             block = create_block(transaction)
             print ("done mining. Sending block...")
-            if not (block == None):
-                block_message_json = block_message(block)
-                ws.send(block_message_json)
-            else:
-                print ("Sorry there someone mined it first :P")
-
+            block_message_json = block_message(block)
+            ws.send(block_message_json)
     elif (message_decoded['message_type'] == "sync_request"):
         print ("blockchain requested")
 
@@ -165,11 +124,6 @@ def on_message(ws, message):
         block = Block.from_json(block_json)
 
         if (block.valid_block() == True):
-
-            if (mining == True):
-                alt_block = block
-                mining = False
-
             temp_blocks = copy.copy(blockchain.blocks)
 
             temp_blocks.append(block)
@@ -178,8 +132,6 @@ def on_message(ws, message):
             if (temp_block_chain.validate_chain() == True):
                 print ("valid new blockchain")
                 blockchain.blocks.append(block)
-
-                blk_dict = fresh_blk_dict(blk_dict['data'])
             else:
                 print("invalid chain. Not updated")
         else:
@@ -198,40 +150,29 @@ def block_message(block):
 
     return block_message_json
 
-def fresh_blk_dict(data):
+def create_block(transaction):
+    print ("mining block...")
 
     iteration = len(blockchain.blocks)
 
     prev_block = blockchain.blocks[iteration - 1]
 
-    blk_dict = {}
-    blk_dict['index'] = iteration
-    blk_dict['timestamp'] = date.datetime.now()
-    blk_dict['data'] = str(data)
-    blk_dict['prev_hash'] = prev_block.hash
-    blk_dict['hash'] = None
-    blk_dict['nonce'] = 0
-
-    return blk_dict
-
-def create_block(transaction):
-    print ("mining block...")
-
-    global blk_dict
-
     miner_secret = get_miner_secret()
     miner_address = get_miner_address()
-
-    ## TODO fix this iteration bug
-    iteration = len(blockchain.blocks)
 
     reward = Reward(miner_address, transaction.amnt, block_iteration = iteration, private_key = miner_secret )
 
     data = json.dumps([str(transaction), str(reward)])
 
-    blk_dict = fresh_blk_dict(data)
+    block_data = {}
+    block_data['index'] = iteration
+    block_data['timestamp'] = date.datetime.now()
+    block_data['data'] = str(data)
+    block_data['prev_hash'] = prev_block.hash
+    block_data['hash'] = None
+    block_data['nonce'] = 0
 
-    mined_block_data = mine()
+    mined_block_data = mine(block_data)
 
     new_block = Block.from_dict(mined_block_data)
     return new_block
