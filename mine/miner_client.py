@@ -98,23 +98,10 @@ def on_message(ws, message):
     if (message_decoded['message_type'] == 'transaction'):
         transaction_json = message_decoded['data']
         transaction = Transaction.from_json(transaction_json)
+
         if (transaction.validate_transaction() == True):
-
-            block_return = [None]
-
-            block_thread = Thread(target=create_block, args = (block_return, transaction))
-            block_thread.start()
-
-            block_thread.join()
-
-            print (block_return[0])
-
-            block = block_return[0]
-
-            print ("done mining. Sending block...")
-            block_message_json = block_message(block)
-
-            ws.send(block_message_json)
+            block_f = Thread(target=block_fanagle, args = (ws, transaction))
+            block_f.start()
 
     elif (message_decoded['message_type'] == "sync_request"):
         print ("blockchain requested")
@@ -140,6 +127,7 @@ def on_message(ws, message):
             block = Block.from_json(block_json)
 
             if (block.valid_block() == True):
+
                 temp_blocks = copy.copy(blockchain.blocks)
 
                 temp_blocks.append(block)
@@ -156,6 +144,63 @@ def on_message(ws, message):
             print ("invalid block")
 
         blockchain.save_blockchain('./blockchain/blockchain.json')
+
+def block_fanagle(ws, transaction):
+    print ("BLOCK FANAGLE")
+    global blockchain
+
+    while True:
+
+        blockchain_length = len(blockchain)
+
+        prev_block = blockchain.find_by_index(str(blockchain_length - 1))
+
+        print (prev_block)
+
+        try:
+            prev_blk_data = json.loads(prev_block.data)
+            prev_blk_transaction = Transaction.from_json(prev_blk_data[0])
+
+            if (prev_blk_transaction == transaction):
+                print ("SAME TRANSACTION. CANCEL MINING")
+                break
+            else:
+                print ("ITS Fine we can still keep going")
+
+        except json.decoder.JSONDecodeError:
+            print ("weird block")
+
+
+
+        block_return = [None]
+
+        block_thread = Thread(target=create_block, args = (block_return, transaction))
+        block_thread.start()
+
+        block_thread.join()
+
+        print (block_return[0])
+
+        block = block_return[0]
+
+        blockchain_blocks = list(blockchain.blocks)
+
+        if (blockchain_length < len(blockchain)):
+            print ("NEW BLOCK WAS RECIEVED!")
+
+        blockchain_blocks.append(block)
+
+        alt_blockchain = BlockChain(blockchain_blocks)
+
+        if (alt_blockchain.validate_chain() == True):
+            print ("done mining. Sending block...")
+            block_message_json = block_message(block)
+
+            ws.send(block_message_json)
+            break
+        else:
+            print ("REMINE")
+            continue
 
 def block_message(block):
 

@@ -27,8 +27,10 @@ class BlockChain:
         block = None
 
         for b in self.blocks:
-            if b['index'] == str(idx):
+            if int(b.index) == int(idx):
                 block = b
+                return b
+                break
 
         return block
 
