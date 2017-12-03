@@ -34,6 +34,9 @@ def miners_socket(ws):
             if (ws in nodes):
                 nodes.remove(ws)
 
+            if (ws in need_sync):
+                need_sync.remove(ws)
+
             print (str(len(miners)) + " active miners")
             break;
 
@@ -43,8 +46,16 @@ def miners_socket(ws):
                 nodes.append(ws)
                 print (str(len(miners)) + " active miners")
             elif (data_decoded['connection'] == False):
-                miners.remove(ws)
-                nodes.remove(ws)
+
+                if (ws in miners):
+                    miners.remove(ws)
+
+                if (ws in nodes):
+                    nodes.remove(ws)
+
+                if (ws in need_sync):
+                    need_sync.remove(ws)
+                    
                 print (str(len(miners)) + " active miners")
         elif(data_decoded['message_type'] == 'new_block'):
             print ('new block!')
@@ -103,6 +114,9 @@ def wallet_socket(ws):
             if ws in nodes:
                 nodes.remove(ws)
 
+            if ws in need_sync:
+                need_sync.remove(ws)
+
             break;
 
         if (data_decoded['message_type'] == "connection"):
@@ -110,7 +124,13 @@ def wallet_socket(ws):
                 nodes.append(ws)
                 print ("node connected")
             elif (data_decoded['connection'] == False):
-                nodes.remove(ws)
+
+                if ws in nodes:
+                    nodes.remove(ws)
+
+                if ws in need_sync:
+                    need_sync.remove(ws)
+
                 print ("node disconnected")
         elif (data_decoded['message_type'] == "transaction"):
             for miner in miners:
