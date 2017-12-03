@@ -230,7 +230,7 @@ def on_open(ws):
                 if ((balance - total_amnt) < 0):
                     print ("can't send payment. Insufficient funds")
                 else:
-                    transaction = create_transaction(sk, pk, amnt, address)
+                    transaction = create_transaction(sk, pk, amnt, address.upper())
 
                     transaction_data = {
                         "message_type": "transaction",
@@ -244,7 +244,7 @@ def on_open(ws):
             elif (mode == "address"):
                 pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
                 print ("Your address below:")
-                print (pk_hex)
+                print (pk_hex.lower())
 
             elif (mode == "nodes"):
                 command_data = {
