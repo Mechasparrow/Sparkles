@@ -1,5 +1,7 @@
 import websocket
 import threading
+from threading import Thread
+
 import time
 import json
 
@@ -97,10 +99,23 @@ def on_message(ws, message):
         transaction_json = message_decoded['data']
         transaction = Transaction.from_json(transaction_json)
         if (transaction.validate_transaction() == True):
-            block = create_block(transaction)
+
+            block_return = [None]
+
+            block_thread = Thread(target=create_block, args = (block_return, transaction))
+            block_thread.start()
+
+            block_thread.join()
+
+            print (block_return[0])
+
+            block = block_return[0]
+
             print ("done mining. Sending block...")
             block_message_json = block_message(block)
+
             ws.send(block_message_json)
+
     elif (message_decoded['message_type'] == "sync_request"):
         print ("blockchain requested")
 
@@ -121,20 +136,23 @@ def on_message(ws, message):
         print ("new block!")
 
         block_json = message_decoded['block']
-        block = Block.from_json(block_json)
+        try:
+            block = Block.from_json(block_json)
 
-        if (block.valid_block() == True):
-            temp_blocks = copy.copy(blockchain.blocks)
+            if (block.valid_block() == True):
+                temp_blocks = copy.copy(blockchain.blocks)
 
-            temp_blocks.append(block)
-            temp_block_chain = BlockChain(temp_blocks)
+                temp_blocks.append(block)
+                temp_block_chain = BlockChain(temp_blocks)
 
-            if (temp_block_chain.validate_chain() == True):
-                print ("valid new blockchain")
-                blockchain.blocks.append(block)
+                if (temp_block_chain.validate_chain() == True):
+                    print ("valid new blockchain")
+                    blockchain.blocks.append(block)
+                else:
+                    print("invalid chain. Not updated")
             else:
-                print("invalid chain. Not updated")
-        else:
+                print ("invalid block")
+        except json.decoder.JSONDecodeError:
             print ("invalid block")
 
         blockchain.save_blockchain('./blockchain/blockchain.json')
@@ -150,7 +168,7 @@ def block_message(block):
 
     return block_message_json
 
-def create_block(transaction):
+def create_block(block_return, transaction):
     print ("mining block...")
 
     iteration = len(blockchain.blocks)
@@ -175,7 +193,11 @@ def create_block(transaction):
     mined_block_data = mine(block_data)
 
     new_block = Block.from_dict(mined_block_data)
-    return new_block
+
+    print (new_block)
+
+    block_return[0] = new_block
+    return block_return
 
 def on_error(ws, error):
     print (error)

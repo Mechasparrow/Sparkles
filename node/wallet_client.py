@@ -105,22 +105,26 @@ def on_message(ws, message):
         print ("New Block Recieved!")
 
         block_json = message_decoded['block']
-        block = Block.from_json(block_json)
 
-        if (block.valid_block() == True):
-            temp_blocks = copy.copy(blockchain.blocks)
+        try:
+            block = Block.from_json(block_json)
 
-            temp_blocks.append(block)
-            temp_block_chain = BlockChain(temp_blocks)
+            if (block.valid_block() == True):
+                temp_blocks = copy.copy(blockchain.blocks)
 
-            print (temp_block_chain)
+                temp_blocks.append(block)
+                temp_block_chain = BlockChain(temp_blocks)
 
-            if (temp_block_chain.validate_chain() == True):
-                print ("valid new blockchain")
-                blockchain.blocks.append(block)
+                print (temp_block_chain)
+
+                if (temp_block_chain.validate_chain() == True):
+                    print ("valid new blockchain")
+                    blockchain.blocks.append(block)
+                else:
+                    print("invalid chain. Not updated")
             else:
-                print("invalid chain. Not updated")
-        else:
+                print ("invalid block")
+        except json.decoder.JSONDecodeError:
             print ("invalid block")
 
         blockchain.save_blockchain('./blockchain/blockchain.json')
