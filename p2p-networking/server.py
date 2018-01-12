@@ -1,36 +1,48 @@
 import socket
 
+import threading
+
 TCP_IP = "127.0.0.1"
 TCP_PORT = 5007
 BUFFER_SIZE = 20
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((TCP_IP, TCP_PORT))
-s.listen(1)
+s.listen(3)
 
-die = False
+sessions = []
+conns = []
 
-while die == False:
+def conn_worker(client_socket):
 
-    conn, addr = s.accept()
-
-    print ('Connection address:' + str(addr))
     while True:
-        data = conn.recv(BUFFER_SIZE)
-        data_decoded = data.decode("utf-8")
 
-        if (data_decoded == "exit"):
-            die = True
-            dead_msg = "Connection dead".encode("utf-8")
-            conn.send(dead_msg)
-            break
+        data = client_socket.recv(BUFFER_SIZE)
 
         if not data:
             break
 
-        print ("recieved data:" + data_decoded)
-        conn.send(data) #echo
+        for conn in conns:
+            broadcast = data
 
-    conn.close()
+            try:
+                conn.send(broadcast)
+            except BrokenPipeError:
+                conns.remove(conn)
+
+
+    conns.remove(client_socket)
+    client_socket.close()
+
+while 1:
+
+    (clientsocket, address) = s.accept()
+
+    ct = threading.Thread(target=conn_worker, args = (clientsocket,))
+    sessions.append(ct)
+    conns.append(clientsocket)
+
+    ct.start()
 
 s.close()
