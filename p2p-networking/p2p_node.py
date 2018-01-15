@@ -62,7 +62,7 @@ for port in range(start_port, start_port + 3000):
 ## Broadcast code
 
 ## FIXME
-def broadcast_message(peer, message, broadcast_list):
+def broadcast_message(peer, message, broadcast_list, node_info):
 
     print ("broadcasting message")
 
@@ -78,10 +78,13 @@ def broadcast_message(peer, message, broadcast_list):
         print ("peer not online")
         return
 
+    new_broadcast_list = copy.copy(broadcast_list)
+    new_broadcast_list.append(node_info)
+
     broadcast_json = {
         "message_type": "broadcast",
         "message": message,
-        "broadcast_sent_to": broadcast_list
+        "broadcast_sent_to": new_broadcast_list
     }
 
     broadcast_string = json.dumps(broadcast_json)
@@ -113,6 +116,9 @@ def broadcast_message(peer, message, broadcast_list):
         print ("connection refused")
 
 ## Server code
+
+SERVER_IP = "127.0.0.1"
+SERVER_PORT = random.randint(start_port, start_port + 3000)
 
 def handle_peer_connection(conn):
 
@@ -174,12 +180,19 @@ def handle_peer_connection(conn):
 
                 print ("Broadcast recieved: " + broadcast_msg)
 
-                # for peer in PEER_LIST:
-                #    if not peer in broadcast_recieved_list:
-                #        broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, broadcast_msg, broadcast_sent_to, ))
-                #        broadcast_message_thread.start()
-                #    else:
-                #        print ("Peer already got message!")
+                new_sent_list = prev_broadcast_list + PEER_LIST
+
+                node_info = {
+                    "address": SERVER_IP,
+                    "port": SERVER_PORT
+                }
+
+                for peer in PEER_LIST:
+                    if not peer in prev_broadcast_list:
+                        broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, broadcast_msg, new_sent_list, node_info, ))
+                        broadcast_message_thread.start()
+                    else:
+                        print ("Peer already got message!")
 
 
         except Exception as err:
@@ -188,9 +201,6 @@ def handle_peer_connection(conn):
 
     conn.close()
     print ("PEER DISCONNECT")
-
-SERVER_IP = "127.0.0.1"
-SERVER_PORT = random.randint(start_port, start_port + 3000)
 
 def server_routine():
 
@@ -391,11 +401,16 @@ def client_routine():
             break
         else:
 
+            node_info = {
+                "address": SERVER_IP,
+                "port": SERVER_PORT
+            }
+
             for peer in PEER_LIST:
 
                 ## TODO implement broadcast_message()
 
-                broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, message,PEER_LIST, ))
+                broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, message,PEER_LIST, node_info, ))
                 broadcast_message_thread.start()
 
 
