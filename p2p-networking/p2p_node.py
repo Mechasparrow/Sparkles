@@ -368,14 +368,14 @@ def client_routine():
 
     global PEER_LIST
 
-    # TODO Send server information to fellow est peers
+    # Send server information to fellow est peers
 
     for peer in PEER_LIST:
         print (peer)
         peer_info_thread = threading.Thread(target=send_peer_server_info, args = (peer,))
         peer_info_thread.start()
 
-    # TODO sync peer list
+    # sync peer list
 
     list_threads = []
 
@@ -390,9 +390,9 @@ def client_routine():
     print ()
     print ("FINAL: " + str(PEER_LIST))
 
-    # TODO broadcast *messages* over the network
-
     while True:
+
+        # Broadcast messages
 
         message = input ("what would you like to broadcast? (exit): ")
 
@@ -408,7 +408,6 @@ def client_routine():
 
             for peer in PEER_LIST:
 
-                ## TODO implement broadcast_message()
 
                 broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, message,PEER_LIST, node_info, ))
                 broadcast_message_thread.start()
