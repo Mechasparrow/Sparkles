@@ -59,6 +59,59 @@ for port in range(start_port, start_port + 3000):
     except ConnectionRefusedError:
         continue;
 
+## Broadcast code
+
+## FIXME
+def broadcast_message(peer, message, broadcast_list):
+
+    print ("broadcasting message")
+
+    PEER_IP = peer["address"]
+    PORT = peer["port"]
+
+    peer_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    peer_conn.settimeout(2.0)
+
+    try:
+        peer_conn.connect((peer["address"], peer["port"]))
+    except ConnectionRefusedError:
+        print ("peer not online")
+        return
+
+    broadcast_json = {
+        "message_type": "broadcast",
+        "message": message,
+        "broadcast_sent_to": broadcast_list
+    }
+
+    broadcast_string = json.dumps(broadcast_json)
+
+    try:
+
+        try:
+
+            peer_conn.send(broadcast_string.encode('utf-8'))
+
+            response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+
+            response_data_json = json.loads(response_data)
+
+            if (response_data_json["message_type"] == "success"):
+
+                print ("BROADCAST SUCCESS")
+
+            else:
+                print ("BROADCAST FAILURE")
+
+            peer_conn.close()
+            return
+
+        except Exception as err:
+            print ("unable to send broadcast")
+            return
+    except ConnectionRefusedError:
+        print ("connection refused")
+
 ## Server code
 
 def handle_peer_connection(conn):
@@ -109,8 +162,28 @@ def handle_peer_connection(conn):
                 peer_list_json_string = json.dumps(peer_list_json)
 
                 conn.send(peer_list_json_string.encode('utf-8'))
-        except Exception:
-            print ("conn error")
+            elif (decoded_data_json["message_type"] == "broadcast"):
+
+                response_json = {"message_type": "success"}
+                response_json_string = json.dumps(response_json)
+
+                conn.send(response_json_string.encode('utf-8'))
+
+                broadcast_msg = decoded_data_json["message"]
+                prev_broadcast_list = decoded_data_json["broadcast_sent_to"]
+
+                print ("Broadcast recieved: " + broadcast_msg)
+
+                # for peer in PEER_LIST:
+                #    if not peer in broadcast_recieved_list:
+                #        broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, broadcast_msg, broadcast_sent_to, ))
+                #        broadcast_message_thread.start()
+                #    else:
+                #        print ("Peer already got message!")
+
+
+        except Exception as err:
+            print ("conn error: " + str(err))
             break
 
     conn.close()
@@ -238,8 +311,6 @@ def peer_list_retrieval(peer):
     except ConnectionRefusedError:
         print ("connection refused")
 
-    pass
-
 def send_peer_server_info(peer):
 
     PEER_IP = peer["address"]
@@ -282,12 +353,6 @@ def send_peer_server_info(peer):
     except ConnectionRefusedError:
         print ("connection refused")
 
-
-## FIXME
-def broadcast_message():
-
-    pass
-
 def client_routine():
     print ("client code")
 
@@ -323,13 +388,14 @@ def client_routine():
 
         if (message == "exit"):
             print ("exiting")
+            break
         else:
 
             for peer in PEER_LIST:
 
                 ## TODO implement broadcast_message()
 
-                broadcast_message_thread = threading.Thread(target=broadcast_message, args = (message,))
+                broadcast_message_thread = threading.Thread(target=broadcast_message, args = (peer, message,PEER_LIST, ))
                 broadcast_message_thread.start()
 
 
