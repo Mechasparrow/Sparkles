@@ -5,6 +5,7 @@ import random
 
 import json
 import copy
+import sys
 
 BUFFER_SIZE = 1024
 session_end = False
@@ -64,49 +65,53 @@ def handle_peer_connection(conn):
 
     while True:
 
-        data = conn.recv(BUFFER_SIZE)
+        try:
+            data = conn.recv(BUFFER_SIZE)
 
-        if not data:
+            if not data:
+                break
+
+            decoded_data = data.decode("utf-8")
+            decoded_data_json = json.loads(decoded_data)
+
+            print (decoded_data_json)
+
+            if (decoded_data_json["message_type"] == "est_conn"):
+                verify_response = "SPARKLENODE"
+                print ("peer connected!")
+                conn.send(verify_response.encode('utf-8'))
+            elif (decoded_data_json["message_type"] == "peer_info"):
+
+                peer_info = decoded_data_json["content"]
+
+                actual_peer_info = {
+                    "address": peer_info['ip'],
+                    "port": peer_info['port']
+                }
+
+                print (actual_peer_info)
+
+                PEER_LIST.append(actual_peer_info)
+
+                print (PEER_LIST)
+
+                response_json = {"message_type": "success"}
+                response_json_string = json.dumps(response_json)
+
+                conn.send(response_json_string.encode('utf-8'))
+            elif (decoded_data_json["message_type"] == "peer_list"):
+
+                peer_list_json = {
+                    "message_type": "peer_list",
+                    "peer_list": PEER_LIST
+                }
+
+                peer_list_json_string = json.dumps(peer_list_json)
+
+                conn.send(peer_list_json_string.encode('utf-8'))
+        except Exception:
+            print ("conn error")
             break
-
-        decoded_data = data.decode("utf-8")
-        decoded_data_json = json.loads(decoded_data)
-
-        print (decoded_data_json)
-
-        if (decoded_data_json["message_type"] == "est_conn"):
-            verify_response = "SPARKLENODE"
-            print ("peer connected!")
-            conn.send(verify_response.encode('utf-8'))
-        elif (decoded_data_json["message_type"] == "peer_info"):
-
-            peer_info = decoded_data_json["content"]
-
-            actual_peer_info = {
-                "address": peer_info['ip'],
-                "port": peer_info['port']
-            }
-
-            print (actual_peer_info)
-
-            PEER_LIST.append(actual_peer_info)
-
-            print (PEER_LIST)
-
-            response_json = {"message_type": "success"}
-            response_json_string = json.dumps(response_json)
-
-            conn.send(response_json_string.encode('utf-8'))
-        elif (decoded_data_json["message_type"] == "peer_list"):
-
-            peer_list_json = {
-                "message_type": "peer_list",
-                "peer_list": PEER_LIST
-            }
-
-            peer_list_json_string = json.dumps(peer_list_json)
-
-            conn.send(peer_list_json_string.encode('utf-8'))
 
     conn.close()
     print ("PEER DISCONNECT")
@@ -119,18 +124,24 @@ def server_routine():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind((SERVER_IP, SERVER_PORT))
+    server_socket.settimeout(2.0)
     server_socket.listen(3)
 
     print ("Server socket hosted on " + SERVER_IP + ":" + str(SERVER_PORT))
 
     print (str(PEER_LIST))
 
-    while 1:
+    global session_end
 
-        (nodesocket, address) = server_socket.accept()
+    while not session_end:
 
-        conn_thread = threading.Thread(target = handle_peer_connection, args = (nodesocket, ))
-        conn_thread.start()
+        try:
+            (nodesocket, address) = server_socket.accept()
+
+            conn_thread = threading.Thread(target = handle_peer_connection, args = (nodesocket, ))
+            conn_thread.start()
+        except socket.timeout:
+            continue
 
     server_socket.close()
 
@@ -194,9 +205,6 @@ def peer_list_retrieval(peer):
     peer_info_string = json.dumps(peer_info_json)
 
     try:
-        node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        node_socket.settimeout(2.0)
-        node_socket.connect((PEER_IP, PORT))
 
         try:
 
@@ -252,9 +260,6 @@ def send_peer_server_info(peer):
     peer_info_string = json.dumps(peer_info_json)
 
     try:
-        node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        node_socket.settimeout(2.0)
-        node_socket.connect((PEER_IP, PORT))
 
         try:
 
@@ -276,6 +281,12 @@ def send_peer_server_info(peer):
             return
     except ConnectionRefusedError:
         print ("connection refused")
+
+
+## FIXME
+def broadcast_message():
+
+    pass
 
 def client_routine():
     print ("client code")
@@ -306,8 +317,29 @@ def client_routine():
 
     # TODO broadcast *messages* over the network
 
+    while True:
+
+        message = input ("what would you like to broadcast? (exit): ")
+
+        if (message == "exit"):
+            print ("exiting")
+        else:
+
+            for peer in PEER_LIST:
+
+                ## TODO implement broadcast_message()
+
+                broadcast_message_thread = threading.Thread(target=broadcast_message, args = (message,))
+                broadcast_message_thread.start()
+
+
+    return
+
 server_thread = threading.Thread(target=server_routine)
 client_thread = threading.Thread(target=client_routine)
 
 server_thread.start()
 client_thread.start()
+
+client_thread.join()
+session_end = True
