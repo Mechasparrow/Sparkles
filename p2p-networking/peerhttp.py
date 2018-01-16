@@ -19,6 +19,19 @@ class PeerHTTP:
         print (json_response_string)
         return json.loads(json_response_string)
 
+    def retrieval_local_peer_list(external_ip):
+
+        # TODO retrieve local peer list
+
+
+        pass
+
+    def retrieve_random_local_peer(external_ip):
+
+        # TODO retrieve a random local peer
+
+        pass
+
     def post_local_peer(external_ip, local_ip, port):
 
         payload = {
