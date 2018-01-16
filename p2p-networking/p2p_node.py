@@ -7,6 +7,8 @@ import json
 import copy
 import sys
 
+from peerhttp import PeerHTTP
+
 BUFFER_SIZE = 1024
 session_end = False
 
@@ -16,7 +18,12 @@ session_end = False
 
 PEER_IP = "127.0.0.1"
 
+
 start_port = 3000
+
+#print (PeerHTTP.get_external_ip())
+
+
 
 PEER_LIST = []
 
