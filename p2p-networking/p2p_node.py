@@ -21,10 +21,6 @@ PEER_IP = "127.0.0.1"
 
 start_port = 3000
 
-#print (PeerHTTP.get_external_ip())
-
-
-
 PEER_LIST = []
 
 for port in range(start_port, start_port + 3000):
