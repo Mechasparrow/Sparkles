@@ -5,6 +5,8 @@ import json
 import urllib.request
 import random
 
+## REFACTOR
+
 class PeerHTTP:
 
     def get_peer_list():
