@@ -13,21 +13,33 @@ BUFFER_SIZE = 1024
 session_end = False
 
 ## Find peers
+EXTERNAL_IP = PeerHTTP.get_external_ip()
 
 ## TODO do on LAN
 
-PEER_IP = "127.0.0.1"
+PEER_IP = PeerHTTP.get_local_ip()
 
 
 start_port = 3000
 
 PEER_LIST = []
 
-for port in range(start_port, start_port + 3000):
+LOCAL_PEER_LIST = PeerHTTP.retrieve_local_peer_list(EXTERNAL_IP)
+
+for peer in LOCAL_PEER_LIST:
     try:
         node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         node_socket.settimeout(2.0)
-        node_socket.connect((PEER_IP, port))
+
+        peer_ip = peer['external']
+        peer_port = peer['port']
+
+        if (peer['type'] == "local"):
+            peer_ip = peer['internal']
+        else:
+            peer_ip = peer['external']
+
+        node_socket.connect((peer_ip, peer_port))
 
         try:
 
@@ -45,8 +57,8 @@ for port in range(start_port, start_port + 3000):
                 print ("valid node found!")
 
                 peer_info = {
-                    "address": PEER_IP,
-                    "port": port
+                    "address": peer_ip,
+                    "port": peer_port
                 }
 
                 PEER_LIST.append(peer_info)
@@ -79,6 +91,10 @@ def broadcast_message(peer, message, broadcast_list, node_info):
         peer_conn.connect((peer["address"], peer["port"]))
     except ConnectionRefusedError:
         print ("peer not online")
+
+        print (peer["address"])
+        print (peer["port"])
+
         return
 
     new_broadcast_list = copy.copy(broadcast_list)
@@ -120,7 +136,7 @@ def broadcast_message(peer, message, broadcast_list, node_info):
 
 ## Server code
 
-SERVER_IP = "127.0.0.1"
+SERVER_IP = PeerHTTP.get_local_ip()
 SERVER_PORT = random.randint(start_port, start_port + 3000)
 
 def handle_peer_connection(conn):
@@ -214,6 +230,7 @@ def server_routine():
     server_socket.listen(3)
 
     print ("Server socket hosted on " + SERVER_IP + ":" + str(SERVER_PORT))
+
 
     print (str(PEER_LIST))
 
@@ -417,6 +434,13 @@ def client_routine():
 
 
     return
+
+post_peer = PeerHTTP.post_local_peer(EXTERNAL_IP, SERVER_IP, SERVER_PORT)
+
+if (post_peer):
+    print ("Server posted")
+else:
+    print ("Server not posted")
 
 server_thread = threading.Thread(target=server_routine)
 client_thread = threading.Thread(target=client_routine)

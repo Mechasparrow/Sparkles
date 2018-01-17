@@ -3,6 +3,7 @@ import http.client
 import json
 
 import urllib.request
+import random
 
 class PeerHTTP:
 
@@ -16,7 +17,6 @@ class PeerHTTP:
         raw_response = response.read()
         json_response_string = raw_response.decode('utf-8')
 
-        print (json_response_string)
         return json.loads(json_response_string)
 
     def retrieve_local_peer_list(external_ip):
@@ -33,7 +33,11 @@ class PeerHTTP:
 
         # TODO retrieve a random local peer
 
-        pass
+        local_peer_list = PeerHTTP.retrieve_local_peer_list(external_ip)
+
+        peer_node = random.choice(local_peer_list)
+
+        return peer_node
 
     def post_external_peer(external_ip, port):
 

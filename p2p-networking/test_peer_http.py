@@ -18,3 +18,8 @@ print ("Peer list: " + str(peer_list))
 
 local_peer_list = PeerHTTP.retrieve_local_peer_list(external_ip)
 print ("Local Peer List: " + str(local_peer_list))
+
+# Retrieve random peer
+
+rando_peer = PeerHTTP.retrieve_random_local_peer(external_ip)
+print ("Rando Peer: " + str(rando_peer))
