@@ -13,4 +13,8 @@ print (str(worked))
 ## Test retrieval of peer list
 
 peer_list = PeerHTTP.get_peer_list()
-print (str(peer_list))
+print ("Peer list: " + str(peer_list))
+
+
+local_peer_list = PeerHTTP.retrieve_local_peer_list(external_ip)
+print ("Local Peer List: " + str(local_peer_list))
