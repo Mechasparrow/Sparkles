@@ -2,6 +2,8 @@ import socket
 import http.client
 import json
 
+import requests
+
 import urllib.request
 import random
 
@@ -11,15 +13,9 @@ class PeerHTTP:
 
     def get_peer_list():
 
-        conn = http.client.HTTPSConnection("sparkles-list.glitch.me")
+        response = requests.get('https://sparkles-list.glitch.me/peers')
 
-        conn.request("GET", url = "/peers")
-        response = conn.getresponse()
-
-        raw_response = response.read()
-        json_response_string = raw_response.decode('utf-8')
-
-        return json.loads(json_response_string)
+        return response.json()
 
     def retrieve_local_peer_list(external_ip):
 
@@ -50,21 +46,9 @@ class PeerHTTP:
             "type": "public"
         }
 
-        conn = http.client.HTTPSConnection("sparkles-list.glitch.me")
-        payload_json = json.dumps(payload)
+        response = requests.post("https://sparkles-list.glitch.me/connect", data = payload)
 
-        headers = {
-            "Content-type": "application/json",
-            "Accept": "text/plain"
-        }
-
-        conn.request("POST", url = "/connect", body = payload_json, headers = headers )
-        response = conn.getresponse()
-        response_raw_data = response.read()
-
-        response_json_string = response_raw_data.decode('utf-8')
-
-        status_code = response.status
+        status_code = response.status_code
 
         if (status_code == 200):
             return True
@@ -81,7 +65,6 @@ class PeerHTTP:
             "type": "local"
         }
 
-        conn = http.client.HTTPSConnection("sparkles-list.glitch.me")
         payload_json = json.dumps(payload)
 
         headers = {
@@ -89,19 +72,14 @@ class PeerHTTP:
             "Accept": "text/plain"
         }
 
-        conn.request("POST", url = "/connect", body = payload_json, headers = headers )
-        response = conn.getresponse()
-        response_raw_data = response.read()
+        response = requests.post("https://sparkles-list.glitch.me/connect", data = payload)
 
-        response_json_string = response_raw_data.decode('utf-8')
-
-        status_code = response.status
+        status_code = response.status_code
 
         if (status_code == 200):
             return True
         else:
             return False
-
 
     def get_local_ip():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -111,6 +89,5 @@ class PeerHTTP:
         return local_ip
 
     def get_external_ip():
-
-        external_ip = urllib.request.urlopen('http://ident.me').read().decode('utf-8')
+        external_ip = requests.get('http://ident.me').text
         return external_ip
