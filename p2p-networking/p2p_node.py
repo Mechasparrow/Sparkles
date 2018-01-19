@@ -32,7 +32,7 @@ for peer in LOCAL_PEER_LIST:
         node_socket.settimeout(2.0)
 
         peer_ip = peer['external']
-        peer_port = peer['port']
+        peer_port = int(peer['port'])
 
         if (peer['type'] == "local"):
             peer_ip = peer['internal']
@@ -72,7 +72,13 @@ for peer in LOCAL_PEER_LIST:
         node_socket.close()
 
     except ConnectionRefusedError:
-        continue;
+        continue
+    except socket.timeout:
+        print ("dead node")
+        continue
+    except Exception as err:
+        print ("weird node")
+        continue
 
 ## Broadcast code
 
