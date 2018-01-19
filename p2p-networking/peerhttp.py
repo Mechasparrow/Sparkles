@@ -65,14 +65,21 @@ class PeerHTTP:
             "type": "local"
         }
 
-        payload_json = json.dumps(payload)
+        response = requests.post("https://sparkles-list.glitch.me/connect", data = payload)
 
-        headers = {
-            "Content-type": "application/json",
-            "Accept": "text/plain"
+        status_code = response.status_code
+
+        if (status_code == 200):
+            return True
+        else:
+            return False
+
+    def delete_peer(h):
+        payload = {
+            "hash": h
         }
 
-        response = requests.post("https://sparkles-list.glitch.me/connect", data = payload)
+        response = requests.delete("https://sparkles-list.glitch.me/delete-peer", data = payload)
 
         status_code = response.status_code
 

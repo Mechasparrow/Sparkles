@@ -33,6 +33,9 @@ PEER_LIST = []
 LOCAL_PEER_LIST = PeerHTTP.retrieve_local_peer_list(EXTERNAL_IP)
 
 for peer in LOCAL_PEER_LIST:
+
+    peer_hash = peer["hash"]
+
     try:
         node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         node_socket.settimeout(2.0)
@@ -73,17 +76,21 @@ for peer in LOCAL_PEER_LIST:
                 continue
         except socket.timeout:
             print ("invalid node")
+            PeerHTTP.delete_peer(peer_hash)
             continue
 
         node_socket.close()
 
     except ConnectionRefusedError:
+        PeerHTTP.delete_peer(peer_hash)
         continue
     except socket.timeout:
         print ("dead node")
+        PeerHTTP.delete_peer(peer_hash)
         continue
     except Exception as err:
         print ("weird node")
+        PeerHTTP.delete_peer(peer_hash)
         continue
 
 ## Server code

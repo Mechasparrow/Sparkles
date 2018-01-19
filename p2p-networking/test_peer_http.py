@@ -23,3 +23,14 @@ print ("Local Peer List: " + str(local_peer_list))
 
 rando_peer = PeerHTTP.retrieve_random_local_peer(external_ip)
 print ("Rando Peer: " + str(rando_peer))
+
+print ()
+print ("rando hash: " + rando_peer["hash"])
+
+
+# Delete random peer
+
+h = rando_peer["hash"]
+print ("Deleting random peer...")
+delete_peer = PeerHTTP.delete_peer(h)
+print (delete_peer)
