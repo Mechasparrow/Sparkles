@@ -1,18 +1,160 @@
 import threading
 
+import socket
+import json
+
 from peer_broadcast import PeerBroadcast
 
+BUFFER_SIZE = 1024
+
+## Utility peer sync
+def merge_peer_list(old_peer_list, new_peer_list, server_ip, server_port):
+
+    ## Remove self from list
+
+    self_info = {
+        "address": server_ip,
+        "port": server_port
+    }
+
+    ## Merge old list and new list
+
+    raw_peer_list = old_peer_list + new_peer_list
+
+    ## Delete ref to self
+
+    if self_info in raw_peer_list:
+        raw_peer_list.remove(self_info)
+
+    ## Remove duplicates
+
+    merged_peer_list = []
+
+    seen = set()
+    for peer_info in raw_peer_list:
+        t = tuple(peer_info.items())
+        if t not in seen:
+            seen.add(t)
+            merged_peer_list.append(peer_info)
+
+    return merged_peer_list
+
+class PeerListRetrieval(threading.Thread):
+
+    def __init__(self, peer, peer_list, server_ip, server_port):
+        threading.Thread.__init__(self)
+        self.peer = peer
+        self.peer_list = peer_list
+        self.server_ip = server_ip
+        self.server_port = server_port
+
+    def run(self):
+        peer = self.peer
+
+        PEER_IP = peer["address"]
+        PORT = peer["port"]
+
+        peer_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        peer_conn.settimeout(2.0)
+        peer_conn.connect((peer["address"], peer["port"]))
+
+        peer_info_json = {
+            "message_type": "peer_list"
+        }
+
+        peer_info_string = json.dumps(peer_info_json)
+
+        try:
+
+            try:
+
+                peer_conn.send(peer_info_string.encode('utf-8'))
+
+                response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+                response_data_json = json.loads(response_data)
+
+                if (response_data_json["message_type"] == "peer_list"):
+
+                    new_peer_list = response_data_json["peer_list"]
+
+                    global PEER_LIST
+                    NEW_PEER_LIST = merge_peer_list(self.peer_list, new_peer_list, self.server_ip, self.server_port)
+
+                    print ()
+                    print ("NEW LIST: " + str(NEW_PEER_LIST))
+
+
+                    self.peer_list = NEW_PEER_LIST
+
+                else:
+                    print ("PEER FAILURE")
+
+                peer_conn.close()
+                return
+
+            except socket.timeout:
+                print ("unable to send peer info")
+                return
+        except ConnectionRefusedError:
+            print ("connection refused")
+
+class SendServerInfo(threading.Thread):
+
+    def __init__(self, peer, server_ip, server_port):
+        threading.Thread.__init__(self)
+        self.peer = peer
+        self.server_ip = server_ip
+        self.server_port = server_port
+
+    def run(self):
+        peer = self.peer
+
+        PEER_IP = peer["address"]
+        PORT = peer["port"]
+
+        peer_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        peer_conn.settimeout(2.0)
+        peer_conn.connect((peer["address"], peer["port"]))
+
+        peer_info_json = {
+            "message_type": "peer_info",
+            "content": {
+                "ip": self.server_ip,
+                "port": self.server_port
+            }
+        }
+
+        peer_info_string = json.dumps(peer_info_json)
+
+        try:
+
+            try:
+
+                peer_conn.send(peer_info_string.encode('utf-8'))
+
+                response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+                response_data_json = json.loads(response_data)
+
+                if (response_data_json["message_type"] == "success"):
+                    print ("PEER SUCCESS")
+                else:
+                    print ("PEER FAILURE")
+
+                peer_conn.close()
+                return
+
+            except socket.timeout:
+                print ("unable to send peer info")
+                return
+        except ConnectionRefusedError:
+            print ("connection refused")
 
 
 
-
-
-
-
-class Client_P2P(threading.Threading):
+class Client_P2P(threading.Thread):
 
     def __init__(self, peer_list, server):
-        threading.Threading.__init__(self)
+        threading.Thread.__init__(self)
         self.peer_list = peer_list
         self.server_ip = server.server_ip
         self.server_port = server.server_port
@@ -24,7 +166,8 @@ class Client_P2P(threading.Threading):
 
         for peer in self.peer_list:
             print (peer)
-            peer_info_thread = threading.Thread(target=send_peer_server_info, args = (peer,))
+
+            peer_info_thread = SendServerInfo(peer, self.server_ip, self.server_port)
             peer_info_thread.start()
 
         # sync peer list
@@ -32,7 +175,8 @@ class Client_P2P(threading.Threading):
         list_threads = []
 
         for peer in self.peer_list:
-            peer_list_thread = threading.Thread(target=peer_list_retrieval, args = (peer,))
+
+            peer_list_thread = PeerListRetrieval(peer, self.peer_list, self.server_ip, self.server_port)
             peer_list_thread.start()
             list_threads.append(peer_list_thread)
 
@@ -59,5 +203,5 @@ class Client_P2P(threading.Threading):
                 }
 
                 for peer in self.peer_list:
-                    broadcast_message_thread = PeerBroadcast(peer, message,PEER_LIST, node_info)
+                    broadcast_message_thread = PeerBroadcast(peer, message,self.peer_list, node_info)
                     broadcast_message_thread.start()
