@@ -1,6 +1,8 @@
 import socket
 from peerhttp import PeerHTTP
 
+import json
+
 BUFFER_SIZE = 1024
 
 def local_search(external_ip):
@@ -16,13 +18,8 @@ def local_search(external_ip):
             node_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             node_socket.settimeout(2.0)
 
-            peer_ip = peer['external']
+            peer_ip = peer['internal']
             peer_port = int(peer['port'])
-
-            if (peer['type'] == "local"):
-                peer_ip = peer['internal']
-            else:
-                peer_ip = peer['external']
 
             node_socket.connect((peer_ip, peer_port))
 
@@ -65,7 +62,7 @@ def local_search(external_ip):
             PeerHTTP.delete_peer(peer_hash)
             continue
         except Exception as err:
-            print ("weird node")
+            print (err)
             PeerHTTP.delete_peer(peer_hash)
             continue
 
