@@ -16,7 +16,6 @@ from server_p2p_node import Server_P2P
 from peer_broadcast import PeerBroadcast
 
 BUFFER_SIZE = 1024
-session_end = False
 
 ## Find peers
 EXTERNAL_IP = PeerHTTP.get_external_ip()
@@ -24,7 +23,6 @@ EXTERNAL_IP = PeerHTTP.get_external_ip()
 ## TODO do on LAN
 
 PEER_IP = PeerHTTP.get_local_ip()
-
 
 start_port = 3000
 
@@ -99,15 +97,6 @@ SERVER_IP = PeerHTTP.get_local_ip()
 SERVER_PORT = random.randint(start_port, start_port + 3000)
 
 ## Client code
-
-def message_gen(message):
-
-    json_message = {
-        "message_type": "message",
-        "content": message
-    }
-
-    json_message_string = json.dumps(json_message)
 
 def merge_peer_list(old_peer_list, new_peer_list):
 
