@@ -10,11 +10,44 @@ BUFFER_SIZE = 1024
 # The handler for peer connections
 class PeerHandler(threading.Thread):
 
-    def __init__(self, conn, peer_list, server):
+    def __init__(self, conn, peer_list, server, handlers):
         threading.Thread.__init__(self)
         self.conn = conn
         self.peer_list = peer_list
         self.server = server
+        self.handlers = handlers
+
+    def broadcast_msg(self, msg, broadcast_list = None, sent_list = None):
+
+        if (sent_list == None):
+            sent_list = self.peer_list
+
+        if (broadcast_list == None):
+            broadcast_list = []
+
+        node_info = {
+            "address": self.server.server_ip,
+            "port": self.server.server_port
+        }
+
+        broadcast_list.append(node_info)
+
+        for peer in self.peer_list:
+            if not peer in broadcast_list:
+                broadcast_message_thread = PeerBroadcast(peer, msg, sent_list, node_info)
+                broadcast_message_thread.start()
+            else:
+                print ("Peer already got message!")
+
+    def propagate_msg(self, broadcast_data):
+        broadcast_message = broadcast_data["message"]
+        prev_broadcast_list = broadcast_data["broadcast_sent_to"]
+
+        print ("Broadcast recieved: " + broadcast_message)
+
+        new_sent_list = prev_broadcast_list + self.peer_list
+
+        self.broadcast_msg(broadcast_message, broadcast_list = prev_broadcast_list, sent_list = new_sent_list)
 
     def run(self):
 
@@ -75,24 +108,20 @@ class PeerHandler(threading.Thread):
 
                     conn.send(response_json_string.encode('utf-8'))
 
-                    broadcast_msg = decoded_data_json["message"]
-                    prev_broadcast_list = decoded_data_json["broadcast_sent_to"]
+                    self.propagate_msg(decoded_data_json)
 
-                    print ("Broadcast recieved: " + broadcast_msg)
+                    try:
+                        raw_payload = decoded_data_json["message"]
+                        payload = json.loads(raw_payload)
+                        payload_header = payload["message_type"]
 
-                    new_sent_list = prev_broadcast_list + self.peer_list
-
-                    node_info = {
-                        "address": self.server.server_ip,
-                        "port": self.server.server_port
-                    }
-
-                    for peer in self.peer_list:
-                        if not peer in prev_broadcast_list:
-                            broadcast_message_thread = PeerBroadcast(peer, broadcast_msg, new_sent_list, node_info)
-                            broadcast_message_thread.start()
+                        if payload_header in self.handlers:
+                            self.handlers[payload_header](self.broadcast_msg)
                         else:
-                            print ("Peer already got message!")
+                            print ("Not a valid command")
+
+                    except Exception as err:
+                        print ("NOT PAYLOAD")
 
 
             except Exception as err:
@@ -108,6 +137,10 @@ class Server_P2P(threading.Thread):
         self.server_ip = server_ip
         self.server_port = server_port
         self.session_end = False
+        self.handlers = {}
+
+    def add_handler(self, handler_name, handler):
+        self.handlers[handler_name] = handler
 
     def stop(self):
         self.session_end = True
@@ -129,7 +162,7 @@ class Server_P2P(threading.Thread):
             try:
                 (nodesocket, address) = server_socket.accept()
 
-                conn_thread = PeerHandler(nodesocket, self.peer_list, self)
+                conn_thread = PeerHandler(conn = nodesocket, peer_list = self.peer_list, server=self, handlers=self.handlers)
                 conn_thread.start()
             except socket.timeout:
                 continue

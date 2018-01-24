@@ -20,7 +20,6 @@ from client_p2p_node import Client_P2P
 # Import broadcast protocol
 from peer_broadcast import PeerBroadcast
 
-BUFFER_SIZE = 1024
 
 ## Find peers
 EXTERNAL_IP = PeerHTTP.get_external_ip()
@@ -43,8 +42,32 @@ if (post_peer):
 else:
     print ("Server not posted")
 
+# Client code
+
+def client_loop(send_message):
+
+    while True:
+
+        # Broadcast messages
+
+        message = input ("what would you like to broadcast? (exit): ")
+
+        if (message == "exit"):
+            print ("exiting")
+            break
+        else:
+            send_message(message)
+
+# Server Code
+
+def cat_handler(broadcast_message):
+    broadcast_message("Meowz")
+
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
-client_thread = Client_P2P(PEER_LIST, server_thread)
+
+server_thread.add_handler("cats", cat_handler)
+
+client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
 
 server_thread.start()
 client_thread.start()

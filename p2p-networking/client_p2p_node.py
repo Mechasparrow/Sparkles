@@ -153,16 +153,24 @@ class SendServerInfo(threading.Thread):
 
 class Client_P2P(threading.Thread):
 
-    def __init__(self, peer_list, server):
+    def __init__(self, peer_list, server, client_code):
         threading.Thread.__init__(self)
         self.peer_list = peer_list
         self.server_ip = server.server_ip
         self.server_port = server.server_port
+        self.client_code = client_code
 
-    def run(self):
-        print ("client code")
+    def send_message(self, message):
+        node_info = {
+            "address": self.server_ip,
+            "port": self.server_port
+        }
 
-        # Send server information to fellow est peers
+        for peer in self.peer_list:
+            broadcast_message_thread = PeerBroadcast(peer, message,self.peer_list, node_info)
+            broadcast_message_thread.start()
+
+    def send_peer_info(self):
 
         for peer in self.peer_list:
             print (peer)
@@ -170,7 +178,7 @@ class Client_P2P(threading.Thread):
             peer_info_thread = SendServerInfo(peer, self.server_ip, self.server_port)
             peer_info_thread.start()
 
-        # sync peer list
+    def sync_peer_list(self):
 
         list_threads = []
 
@@ -183,25 +191,20 @@ class Client_P2P(threading.Thread):
         for list_thread in list_threads:
             list_thread.join()
 
+    def run(self):
+        print ("client code")
+
+        # Send server information to fellow est peers
+
+        self.send_peer_info()
+
+        # sync peer list
+
+        self.sync_peer_list()
+
+
         print ()
         print ("FINAL: " + str(self.peer_list))
 
-        while True:
-
-            # Broadcast messages
-
-            message = input ("what would you like to broadcast? (exit): ")
-
-            if (message == "exit"):
-                print ("exiting")
-                break
-            else:
-
-                node_info = {
-                    "address": self.server_ip,
-                    "port": self.server_port
-                }
-
-                for peer in self.peer_list:
-                    broadcast_message_thread = PeerBroadcast(peer, message,self.peer_list, node_info)
-                    broadcast_message_thread.start()
+        # Software loop
+        self.client_code(self.send_message)
