@@ -45,6 +45,8 @@ def local_search(external_ip):
 
                     peer_list.append(peer_info)
 
+                    break
+
                 else:
                     continue
             except socket.timeout:

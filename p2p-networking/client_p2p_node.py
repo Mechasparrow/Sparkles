@@ -167,7 +167,7 @@ class Client_P2P(threading.Thread):
         }
 
         for peer in self.peer_list:
-            broadcast_message_thread = PeerBroadcast(peer, message,self.peer_list, node_info)
+            broadcast_message_thread = PeerBroadcast(peer, message, self.peer_list, node_info)
             broadcast_message_thread.start()
 
     def send_peer_info(self):

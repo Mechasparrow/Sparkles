@@ -2,6 +2,7 @@ import websocket
 import threading
 import time
 import json
+import random
 
 import sys
 
@@ -31,3 +32,59 @@ from client_p2p_node import Client_P2P
 
 # Import broadcast protocol
 from peer_broadcast import PeerBroadcast
+
+## Setup
+
+## Find peers
+EXTERNAL_IP = PeerHTTP.get_external_ip()
+
+## TODO do on LAN
+
+start_port = 3000
+
+PEER_LIST = peer_search.local_search(EXTERNAL_IP)
+
+## Server code
+
+SERVER_IP = PeerHTTP.get_local_ip()
+SERVER_PORT = random.randint(start_port, start_port + 3000)
+
+post_peer = PeerHTTP.post_local_peer(EXTERNAL_IP, SERVER_IP, SERVER_PORT)
+
+if (post_peer):
+    print ("Server posted")
+else:
+    print ("Server not posted")
+
+# Client and Server Handlers
+def prompt_string():
+    return "What would you like to do? (transaction, address, balance, exit): "
+
+def get_address():
+    print ("I dunno")
+    # TODO Get Address
+
+def client_loop(send_message):
+
+    print ("Welcome to Sparkles 2.0")
+
+    while True:
+
+        response = input(prompt_string())
+
+        if (response == "exit"):
+            print ("Exiting")
+            break
+        elif (response == "address"):
+            get_address()
+
+# Spin up the threads
+server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
+
+client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
+
+server_thread.start()
+client_thread.start()
+
+client_thread.join()
+server_thread.exit()
