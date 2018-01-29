@@ -70,9 +70,7 @@ private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
 
 def transaction_handler(broadcast_message, payload):
 
-    print (payload)
-
-    pass
+    print ("RECIEVED TRANSACTION!")
 
 def client_loop(send_message):
 
