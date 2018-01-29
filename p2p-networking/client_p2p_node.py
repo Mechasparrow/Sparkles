@@ -68,7 +68,7 @@ class PeerListRetrieval(threading.Thread):
 
             try:
 
-                peer_conn.send(peer_info_string.encode('utf-8'))
+                peer_conn.sendall(peer_info_string.encode('utf-8'))
 
                 response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
                 response_data_json = json.loads(response_data)
@@ -130,7 +130,7 @@ class SendServerInfo(threading.Thread):
 
             try:
 
-                peer_conn.send(peer_info_string.encode('utf-8'))
+                peer_conn.sendall(peer_info_string.encode('utf-8'))
 
                 response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
                 response_data_json = json.loads(response_data)

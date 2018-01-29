@@ -71,7 +71,7 @@ class PeerHandler(threading.Thread):
                 if (decoded_data_json["message_type"] == "est_conn"):
                     verify_response = "SPARKLENODE"
                     print ("peer connected!")
-                    conn.send(verify_response.encode('utf-8'))
+                    conn.sendall(verify_response.encode('utf-8'))
                 elif (decoded_data_json["message_type"] == "peer_info"):
 
                     peer_info = decoded_data_json["content"]
@@ -90,7 +90,7 @@ class PeerHandler(threading.Thread):
                     response_json = {"message_type": "success"}
                     response_json_string = json.dumps(response_json)
 
-                    conn.send(response_json_string.encode('utf-8'))
+                    conn.sendall(response_json_string.encode('utf-8'))
                 elif (decoded_data_json["message_type"] == "peer_list"):
 
                     peer_list_json = {
@@ -100,13 +100,13 @@ class PeerHandler(threading.Thread):
 
                     peer_list_json_string = json.dumps(peer_list_json)
 
-                    conn.send(peer_list_json_string.encode('utf-8'))
+                    conn.sendall(peer_list_json_string.encode('utf-8'))
                 elif (decoded_data_json["message_type"] == "broadcast"):
 
                     response_json = {"message_type": "success"}
                     response_json_string = json.dumps(response_json)
 
-                    conn.send(response_json_string.encode('utf-8'))
+                    conn.sendall(response_json_string.encode('utf-8'))
 
                     self.propagate_msg(decoded_data_json)
 
