@@ -80,9 +80,6 @@ def create_transaction(sk, pk, amnt, address):
 
     return transaction
 
-def transaction_prompts():
-
-
 def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0")
@@ -98,7 +95,20 @@ def client_loop(send_message):
             get_address(public_key)
         elif (response == "transaction"):
 
-            pass
+            print ("beginning transaction...")
+
+            sk, pk = private_key, public_key ## Alias
+
+            address = input("What address do you want to send to?: ")
+            amnt = float(input("How much would you like to send?: "))
+
+            pk_hex = get_address_hex(pk)
+
+            ## TODO implement balance checking
+
+            transaction = create_transaction(sk, pk, amnt, address.upper())
+
+            print (str(transaction))
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
