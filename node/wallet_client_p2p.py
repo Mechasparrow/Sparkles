@@ -74,6 +74,15 @@ def get_address(public_key):
     print ("Your address below")
     print (pk_hex.lower())
 
+def create_transaction(sk, pk, amnt, address):
+    pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
+    transaction = Transaction(pk_hex, address, str(amnt), note = "", private_key = sk)
+
+    return transaction
+
+def transaction_prompts():
+
+
 def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0")
@@ -87,6 +96,9 @@ def client_loop(send_message):
             break
         elif (response == "address"):
             get_address(public_key)
+        elif (response == "transaction"):
+
+            pass
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
