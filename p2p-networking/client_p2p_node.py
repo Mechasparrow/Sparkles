@@ -71,8 +71,8 @@ class PeerListRetrieval(threading.Thread):
                 peer_conn.sendall(peer_info_string.encode('utf-8'))
 
                 response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
-                response_data_json = json.loads(response_data)
 
+                response_data_json = json.loads(response_data)
                 if (response_data_json["message_type"] == "peer_list"):
 
                     new_peer_list = response_data_json["peer_list"]
