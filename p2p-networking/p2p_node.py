@@ -60,7 +60,8 @@ def client_loop(send_message):
 
 # Server Code
 
-def cat_handler(broadcast_message):
+def cat_handler(broadcast_message, payload):
+    print (payload)
     broadcast_message("Meowz")
 
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)

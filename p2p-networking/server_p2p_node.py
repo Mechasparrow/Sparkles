@@ -116,7 +116,7 @@ class PeerHandler(threading.Thread):
                         payload_header = payload["message_type"]
 
                         if payload_header in self.handlers:
-                            self.handlers[payload_header](self.broadcast_msg)
+                            self.handlers[payload_header](self.broadcast_msg, payload)
                         else:
                             print ("Not a valid command")
 
