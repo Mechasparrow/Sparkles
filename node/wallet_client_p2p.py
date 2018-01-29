@@ -106,6 +106,9 @@ def client_loop(send_message):
 
             ## TODO implement balance checking
 
+
+            ##
+
             transaction = create_transaction(sk, pk, amnt, address.upper())
 
             transaction_data = {
