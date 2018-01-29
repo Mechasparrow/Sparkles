@@ -158,20 +158,26 @@ def client_loop(send_message):
             pk_hex = get_address_hex(pk)
 
             ## TODO implement balance checking
+            balance = get_balance(pk_hex)
 
+            commission = amnt * 0.01
+            total_amnt = amnt + commission
 
-            ##
+            print ("total amnt being sent is " + str(total_amnt))
 
-            transaction = create_transaction(sk, pk, amnt, address.upper())
+            if ((balance - total_amnt) < 0):
+                print ("can't send payment. Insufficient funds")
+            else: 
+                transaction = create_transaction(sk, pk, amnt, address.upper())
 
-            transaction_data = {
-                "message_type": "transaction",
-                "data": str(transaction)
-            }
+                transaction_data = {
+                    "message_type": "transaction",
+                    "data": str(transaction)
+                }
 
-            transaction_data_json = json.dumps(transaction_data)
+                transaction_data_json = json.dumps(transaction_data)
 
-            send_message(transaction_data_json)
+                send_message(transaction_data_json)
 
 
 # Spin up the threads
