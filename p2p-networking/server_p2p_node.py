@@ -5,6 +5,8 @@ import json
 
 from peer_broadcast import PeerBroadcast
 
+from socket_recieve_all import recvall
+
 BUFFER_SIZE = 1024
 
 # The handler for peer connections
@@ -58,7 +60,9 @@ class PeerHandler(threading.Thread):
         while True:
 
             try:
-                data = conn.recv(BUFFER_SIZE)
+                data = recvall(conn)
+                print (data)
+
 
                 if not data:
                     break

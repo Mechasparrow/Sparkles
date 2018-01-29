@@ -6,7 +6,7 @@ import json
 
 import copy
 
-BUFFER_SIZE = 1024
+import socket_protocol as sp
 
 class PeerBroadcast(threading.Thread):
 
@@ -57,9 +57,9 @@ class PeerBroadcast(threading.Thread):
 
             try:
 
-                peer_conn.send(broadcast_string.encode('utf-8'))
+                sp.send_msg(peer_conn, broadcast_string.encode('utf-8'))
 
-                response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+                response_data = sp.recv_msg(peer_conn).decode('utf-8')
 
                 response_data_json = json.loads(response_data)
 

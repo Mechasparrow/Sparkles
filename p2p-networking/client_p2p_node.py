@@ -4,6 +4,7 @@ import socket
 import json
 
 from peer_broadcast import PeerBroadcast
+from socket_recieve_all import recvall
 
 BUFFER_SIZE = 1024
 
@@ -70,7 +71,7 @@ class PeerListRetrieval(threading.Thread):
 
                 peer_conn.sendall(peer_info_string.encode('utf-8'))
 
-                response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+                response_data = recvall(peer_conn).decode('utf-8')
 
                 response_data_json = json.loads(response_data)
                 if (response_data_json["message_type"] == "peer_list"):
@@ -132,7 +133,7 @@ class SendServerInfo(threading.Thread):
 
                 peer_conn.sendall(peer_info_string.encode('utf-8'))
 
-                response_data = peer_conn.recv(BUFFER_SIZE).decode('utf-8')
+                response_data = recvall(peer_conn).decode('utf-8')
                 response_data_json = json.loads(response_data)
 
                 if (response_data_json["message_type"] == "success"):
