@@ -1,6 +1,8 @@
 import socket
 from peerhttp import PeerHTTP
 
+import socket_protocol as sp
+
 import json
 
 BUFFER_SIZE = 1024
@@ -31,9 +33,9 @@ def local_search(external_ip):
 
                 test_peer_string = json.dumps(test_peer_message)
 
-                node_socket.send(test_peer_string.encode('utf-8'))
+                sp.send_msg(node_socket, test_peer_string.encode('utf-8'))
 
-                verify_message = node_socket.recv(BUFFER_SIZE).decode('utf-8')
+                verify_message = sp.recv_msg(node_socket).decode('utf-8')
 
                 if (verify_message == "SPARKLENODE"):
                     print ("valid node found!")
