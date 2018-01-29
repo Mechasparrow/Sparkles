@@ -90,6 +90,35 @@ def get_address(public_key):
     print ("Your address below")
     print (pk_hex.lower())
 
+def get_balance(pk_hex):
+
+    balance = 0.0
+
+    # TODO implement balance loading
+
+    for block in blockchain.blocks:
+        try:
+            blk_data = json.loads(block.data)
+
+            blk_transaction = Transaction.from_json(blk_data[0])
+            blk_reward = Reward.from_json(blk_data[1])
+
+            if (blk_transaction.sender_pub_key == pk_hex):
+                balance = balance - float(blk_transaction.amnt)
+                balance = balance - float(blk_reward.reward_amnt)
+
+            if (blk_transaction.address == pk_hex):
+                balance = balance + float(blk_transaction.amnt)
+
+            if (blk_reward.recipient == pk_hex):
+                balance = balance + blk_reward.block_reward
+
+        except json.decoder.JSONDecodeError:
+            continue
+
+    return balance
+
+
 def create_transaction(sk, pk, amnt, address):
     pk_hex = base64.b16encode(pk.to_string()).decode('utf-8')
     transaction = Transaction(pk_hex, address, str(amnt), note = "", private_key = sk)
@@ -109,6 +138,14 @@ def client_loop(send_message):
             break
         elif (response == "address"):
             get_address(public_key)
+        elif (response == "balance"):
+            sk, pk = private_key, public_key
+
+            pk_hex = get_address_hex(pk)
+            balance = get_balance(pk_hex)
+
+            print (balance)
+
         elif (response == "transaction"):
 
             print ("beginning transaction...")
