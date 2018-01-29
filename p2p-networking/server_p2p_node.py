@@ -5,7 +5,8 @@ import json
 
 from peer_broadcast import PeerBroadcast
 
-from socket_recieve_all import recvall
+
+import socket_protocol as sp
 
 BUFFER_SIZE = 1024
 
@@ -60,7 +61,7 @@ class PeerHandler(threading.Thread):
         while True:
 
             try:
-                data = recvall(conn)
+                data = sp.recv_msg(conn)
                 print (data)
 
 
@@ -75,7 +76,8 @@ class PeerHandler(threading.Thread):
                 if (decoded_data_json["message_type"] == "est_conn"):
                     verify_response = "SPARKLENODE"
                     print ("peer connected!")
-                    conn.sendall(verify_response.encode('utf-8'))
+
+                    sp.send_msg(conn, verify_response.encode('utf-8'))
                 elif (decoded_data_json["message_type"] == "peer_info"):
 
                     peer_info = decoded_data_json["content"]
@@ -94,7 +96,9 @@ class PeerHandler(threading.Thread):
                     response_json = {"message_type": "success"}
                     response_json_string = json.dumps(response_json)
 
-                    conn.sendall(response_json_string.encode('utf-8'))
+
+                    sp.send_msg(conn, response_json_string.encode('utf-8'))
+
                 elif (decoded_data_json["message_type"] == "peer_list"):
 
                     peer_list_json = {
@@ -104,14 +108,15 @@ class PeerHandler(threading.Thread):
 
                     peer_list_json_string = json.dumps(peer_list_json)
 
-                    conn.sendall(peer_list_json_string.encode('utf-8'))
+                    sp.send_msg(conn, peer_list_json_string.encode('utf-8'))
+
                 elif (decoded_data_json["message_type"] == "broadcast"):
 
                     response_json = {"message_type": "success"}
                     response_json_string = json.dumps(response_json)
 
-                    conn.sendall(response_json_string.encode('utf-8'))
-
+                    sp.send_msg(conn, response_json_string.encode('utf-8'))
+                    
                     self.propagate_msg(decoded_data_json)
 
                     try:
