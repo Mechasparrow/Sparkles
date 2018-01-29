@@ -35,6 +35,8 @@ from peer_broadcast import PeerBroadcast
 
 ## Setup
 
+blockchain = BlockChain([]) # Create an empty blockchain
+
 ## Find peers
 EXTERNAL_IP = PeerHTTP.get_external_ip()
 
@@ -64,6 +66,20 @@ private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
 
 def prompt_string():
     return "What would you like to do? (transaction, address, balance, exit): "
+
+def load_blockchain(): ## Function for loading the blockchain from local copy
+    try:
+        blockchain = BlockChain.load_blockchain('./blockchain/blockchain.json')
+        if (blockchain.validate_chain()):
+            print ("BlockChain is valid")
+    except FileNotFoundError:
+        blocks = []
+        genesis_block = Block.load_from_file('./genesis_block/genesis_block.json')
+        blocks.append(genesis_block)
+        blockchain = BlockChain(blocks)
+
+    return blockchain
+
 
 def get_address_hex(public_key):
     pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
@@ -125,6 +141,10 @@ def client_loop(send_message):
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
 
 client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
+
+# Load up a local copy of the blockchain
+blockchain = load_blockchain()
+print (blockchain)
 
 server_thread.start()
 client_thread.start()
