@@ -57,12 +57,22 @@ else:
     print ("Server not posted")
 
 # Client and Server Handlers
+
+# Public and Private key for transactions
+public_key = crypto_key_gen.from_public_pem('./keys/public.pem')
+private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
+
 def prompt_string():
     return "What would you like to do? (transaction, address, balance, exit): "
 
-def get_address():
-    print ("I dunno")
-    # TODO Get Address
+def get_address_hex(public_key):
+    pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
+    return pk_hex
+
+def get_address(public_key):
+    pk_hex = get_address_hex(public_key)
+    print ("Your address below")
+    print (pk_hex.lower())
 
 def client_loop(send_message):
 
@@ -76,7 +86,7 @@ def client_loop(send_message):
             print ("Exiting")
             break
         elif (response == "address"):
-            get_address()
+            get_address(public_key)
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
