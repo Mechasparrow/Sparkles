@@ -108,7 +108,15 @@ def client_loop(send_message):
 
             transaction = create_transaction(sk, pk, amnt, address.upper())
 
-            print (str(transaction))
+            transaction_data = {
+                "message_type": "transaction",
+                "data": str(transaction)
+            }
+
+            transaction_data_json = json.dumps(transaction_data)
+
+            send_message(transaction_data_json)
+
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
