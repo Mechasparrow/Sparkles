@@ -68,14 +68,25 @@ else:
 public_key = crypto_key_gen.from_public_pem('./keys/public.pem')
 private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
 
+def transaction_handler(broadcast_message, payload):
+
+    print (payload)
+
+    pass
+
 def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0 (Miner)")
 
-    pass
+    while True:
+
+        continue
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
+
+# Add handlers
+server_thread.add_handler("transaction", transaction_handler)
 
 client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
 
