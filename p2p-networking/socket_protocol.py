@@ -11,7 +11,6 @@ def send_msg(sock, msg):
 def recv_msg(sock):
     # Read message length and unpack it into an integer
     raw_msglen = recvall(sock, 4)
-    print (raw_msglen)
     if not raw_msglen:
         return None
     msglen = struct.unpack('>I', raw_msglen)[0]

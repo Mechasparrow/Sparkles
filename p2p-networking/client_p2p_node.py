@@ -3,6 +3,8 @@ import threading
 import socket
 import json
 
+import time
+
 from peer_broadcast import PeerBroadcast
 
 import socket_protocol as sp
@@ -66,6 +68,8 @@ class PeerListRetrieval(threading.Thread):
 
         peer_info_string = json.dumps(peer_info_json)
 
+        sp.send_msg(peer_conn, peer_info_string.encode('utf-8'))
+
         try:
 
             try:
@@ -93,7 +97,7 @@ class PeerListRetrieval(threading.Thread):
                 return
 
             except socket.timeout:
-                print ("unable to send peer info")
+                print ("unable to retrieve peer list")
                 return
         except ConnectionRefusedError:
             print ("connection refused")
@@ -133,6 +137,7 @@ class SendServerInfo(threading.Thread):
             try:
 
                 response_data = sp.recv_msg(peer_conn).decode('utf-8')
+                print (response_data)
                 response_data_json = json.loads(response_data)
 
                 if (response_data_json["message_type"] == "success"):

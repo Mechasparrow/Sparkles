@@ -62,8 +62,6 @@ class PeerHandler(threading.Thread):
 
             try:
                 data = sp.recv_msg(conn)
-                print (data)
-
 
                 if not data:
                     break
@@ -91,11 +89,10 @@ class PeerHandler(threading.Thread):
 
                     self.peer_list.append(actual_peer_info)
 
-                    print (self.peer_list)
+                    print ("got peer info!")
 
                     response_json = {"message_type": "success"}
                     response_json_string = json.dumps(response_json)
-
 
                     sp.send_msg(conn, response_json_string.encode('utf-8'))
 
@@ -116,7 +113,7 @@ class PeerHandler(threading.Thread):
                     response_json_string = json.dumps(response_json)
 
                     sp.send_msg(conn, response_json_string.encode('utf-8'))
-                    
+
                     self.propagate_msg(decoded_data_json)
 
                     try:
