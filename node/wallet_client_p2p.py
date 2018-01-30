@@ -80,6 +80,20 @@ def load_blockchain(): ## Function for loading the blockchain from local copy
 
     return blockchain
 
+## Request blockchains from peers
+def request_blockchain():
+
+    pass
+
+## Upload blockchain to peer
+def upload_blockchain():
+
+    pass
+
+## Sync blockchain
+def sync_blockchain():
+
+    pass
 
 def get_address_hex(public_key):
     pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
@@ -167,7 +181,7 @@ def client_loop(send_message):
 
             if ((balance - total_amnt) < 0):
                 print ("can't send payment. Insufficient funds")
-            else: 
+            else:
                 transaction = create_transaction(sk, pk, amnt, address.upper())
 
                 transaction_data = {
