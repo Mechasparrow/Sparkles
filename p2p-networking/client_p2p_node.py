@@ -68,6 +68,8 @@ class PeerListRetrieval(threading.Thread):
 
         peer_info_string = json.dumps(peer_info_json)
 
+        sp.send_msg(peer_conn, peer_info_string.encode('utf-8'))
+
         try:
 
             try:
