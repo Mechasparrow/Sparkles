@@ -171,7 +171,6 @@ def block_fanagle(ws, transaction):
             print ("weird block")
 
 
-
         block_return = [None]
 
         block_thread = Thread(target=create_block, args = (block_return, transaction))
