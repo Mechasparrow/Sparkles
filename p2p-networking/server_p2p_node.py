@@ -127,6 +127,7 @@ class PeerHandler(threading.Thread):
                             print ("Not a valid command")
 
                     except Exception as err:
+                        print (err)
                         print ("NOT PAYLOAD")
 
 
