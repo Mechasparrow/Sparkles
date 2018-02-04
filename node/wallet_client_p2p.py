@@ -81,19 +81,53 @@ def load_blockchain(): ## Function for loading the blockchain from local copy
     return blockchain
 
 ## Request blockchains from peers
-def request_blockchain():
+def request_blockchain(send_message):
 
-    pass
+    message_json = {
+        "message_type": "blockchain_request"
+    }
+
+    request_message = json.dumps(message_json)
+
+    send_message(request_message)
 
 ## Upload blockchain to peer
-def upload_blockchain():
+def upload_blockchain(broadcast_message, payload):
 
-    pass
+    print ("preparing to broadcast message");
+
+    blockchain_json = {
+        "message_type": "blockchain_upload",
+        "data": str(blockchain)
+    }
+
+    blockchain_message = json.dumps(blockchain_json)
+
+    broadcast_message(blockchain_message)
 
 ## Sync blockchain
-def sync_blockchain():
+def sync_blockchain(broadcast_message, payload):
 
-    pass
+    print ("preparing for sync")
+
+    global blockchain
+
+    recv_blockchain_raw = json.loads(payload["data"])
+
+    recieved_blockchain = BlockChain.from_json(payload["data"])
+
+    synced_blockchain = BlockChain.sync_blockchain(blockchain, recieved_blockchain)
+
+    blockchain = synced_blockchain
+
+    blockchain.save_blockchain('./blockchain/blockchain.json')
+
+    print ("blockchain synced")
+
+    print()
+
+    print (prompt_string())
+
 
 def get_address_hex(public_key):
     pk_hex = base64.b16encode(public_key.to_string()).decode('utf-8')
@@ -142,6 +176,8 @@ def create_transaction(sk, pk, amnt, address):
 def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0")
+
+    request_blockchain(send_message)
 
     while True:
 
@@ -196,6 +232,10 @@ def client_loop(send_message):
 
 # Spin up the threads
 server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
+
+# Add Handlers for the server side
+server_thread.add_handler("blockchain_request", upload_blockchain)
+server_thread.add_handler("blockchain_upload", sync_blockchain)
 
 client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
 
