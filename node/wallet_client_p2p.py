@@ -80,6 +80,14 @@ def load_blockchain(): ## Function for loading the blockchain from local copy
 
     return blockchain
 
+## When the client recieves a new block
+
+def block_recieve(broadcast_message, payload):
+
+    print ("NEW BLOCK RECIEVED")
+
+    print (payload)
+
 ## Request blockchains from peers
 def request_blockchain(send_message):
 
@@ -177,6 +185,7 @@ def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0")
 
+    upload_blockchain(send_message, [])
     request_blockchain(send_message)
 
     while True:
@@ -236,6 +245,7 @@ server_thread = Server_P2P(PEER_LIST, SERVER_IP, SERVER_PORT)
 # Add Handlers for the server side
 server_thread.add_handler("blockchain_request", upload_blockchain)
 server_thread.add_handler("blockchain_upload", sync_blockchain)
+server_thread.add_handler("block_upload", block_recieve)
 
 client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
 

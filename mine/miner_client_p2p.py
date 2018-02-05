@@ -166,8 +166,12 @@ def transaction_handler(broadcast_message, payload):
 
         new_block = blk_return[0]
 
-        update_blockchain(new_block)
+        good_block = update_blockchain(new_block)
 
+        if (good_block == True):
+            upload_block(new_block, broadcast_message)
+        else:
+            print ("That was a pretty bad block, so were not going to send it out to peers")
 
 def update_blockchain(block):
 
@@ -181,10 +185,13 @@ def update_blockchain(block):
         if (temp_block_chain.validate_chain() == True):
             print ("valid new blockchain")
             blockchain.blocks.append(block)
+            return True
         else:
             print("invalid chain. Not updated")
+            return False
     else:
         print ("invalid block")
+        return False
 
     blockchain.save_blockchain('./blockchain/blockchain.json')
 
@@ -249,7 +256,9 @@ def client_loop(send_message):
 
     print ("Welcome to Sparkles 2.0 (Miner)")
 
+    upload_blockchain(send_message, [])
     request_blockchain(send_message)
+
 
     while True:
 
