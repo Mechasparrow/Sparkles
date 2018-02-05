@@ -159,11 +159,34 @@ def transaction_handler(broadcast_message, payload):
     transaction_raw = payload['data']
     tx = Transaction.from_json(transaction_raw)
 
-    blk_return = []
+    if (tx.validate_transaction()):
+        blk_return = []
 
-    create_block(blk_return, tx)
+        create_block(blk_return, tx)
 
-    print (blk_return)
+        new_block = blk_return[0]
+
+        update_blockchain(new_block)
+
+
+def update_blockchain(block):
+
+    if (block.valid_block() == True):
+
+        temp_blocks = copy.copy(blockchain.blocks)
+
+        temp_blocks.append(block)
+        temp_block_chain = BlockChain(temp_blocks)
+
+        if (temp_block_chain.validate_chain() == True):
+            print ("valid new blockchain")
+            blockchain.blocks.append(block)
+        else:
+            print("invalid chain. Not updated")
+    else:
+        print ("invalid block")
+
+    blockchain.save_blockchain('./blockchain/blockchain.json')
 
 def upload_block(block, broadcast_message):
 
