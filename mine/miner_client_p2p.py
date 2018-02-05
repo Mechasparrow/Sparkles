@@ -95,8 +95,8 @@ def get_miner_secret():
 
 def header_string(index, prev_hash, data, timestamp, nonce):
     return str(index) + str(prev_hash) + str(data) + str(timestamp) + str(nonce)
-
 def generate_hash(header_string):
+
     sha = hashlib.sha256()
     sha.update(header_string.encode('utf-8'))
     return sha.hexdigest()
@@ -150,13 +150,31 @@ def create_block(block_return, transaction):
 
     print (new_block)
 
-    block_return[0] = new_block
+    block_return.append(new_block)
     return block_return
 
 # Handle transactions
 def transaction_handler(broadcast_message, payload):
 
-    print ("RECIEVED TRANSACTION!")
+    transaction_raw = payload['data']
+    tx = Transaction.from_json(transaction_raw)
+
+    blk_return = []
+
+    create_block(blk_return, tx)
+
+    print (blk_return)
+
+def upload_block(block, broadcast_message):
+
+    block_upload_json = {
+        "message_type": "block_upload",
+        "data": str(block)
+    }
+
+    block_upload_message = json.dumps(block_upload_json)
+
+    broadcast_message(block_upload_message)
 
 ## Request blockchains from peers
 def request_blockchain(send_message):
