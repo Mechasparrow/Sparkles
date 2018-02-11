@@ -206,6 +206,41 @@ def upload_block(block, broadcast_message):
 
     broadcast_message(block_upload_message)
 
+def block_recieve(broadcast_message, payload):
+
+    print()
+    print ("NEW BLOCK RECIEVED")
+
+    block_json = payload['data']
+
+    try:
+        block = Block.from_json(block_json)
+
+        if (block.valid_block() == True):
+            temp_blocks = copy.copy(blockchain.blocks)
+
+            temp_blocks.append(block)
+            temp_block_chain = BlockChain(temp_blocks)
+
+            print (temp_block_chain)
+
+            if (temp_block_chain.validate_chain() == True):
+                print ("valid new blockchain")
+                blockchain.blocks.append(block)
+            else:
+                print("invalid chain. Not updated")
+        else:
+            print ("invalid block")
+    except json.decoder.JSONDecodeError:
+        print ("invalid block")
+
+    blockchain.save_blockchain('./blockchain/blockchain.json')
+
+    print ()
+
+    sys.stdout.write(prompt_string())
+    sys.stdout.flush()
+
 ## Request blockchains from peers
 def request_blockchain(send_message):
 
@@ -277,6 +312,7 @@ server_thread.add_handler("transaction", transaction_handler)
 # For handling blockchain stuff
 server_thread.add_handler("blockchain_request", upload_blockchain)
 server_thread.add_handler("blockchain_upload", sync_blockchain)
+server_thread.add_handler("block_upload", block_recieve)
 
 client_thread = Client_P2P(PEER_LIST, server_thread, client_loop)
 
