@@ -77,9 +77,14 @@ class BlockMiner(threading.Thread):
             mine_block_dict['nonce'] = mine_block_dict['nonce'] + 1
 
         if (self.stop_mining == True):
-            print (self.stop_reason)
-            self.block = None
-            return
+
+            if (self.stop_reason == "block_conflict"):
+                print (self.stop_reason)
+                self.block = None
+                return
+            elif (self.stop_reason == "remine"):
+                print ("REMINE")
+                self.restart_mining()
 
         self.block = Block.from_dict(mine_block_dict)
 
@@ -107,7 +112,11 @@ class BlockMiner(threading.Thread):
         self.is_miner_active = False
         pass
 
-    def restart_mining():
+    def restart_mining(self):
+        self.is_miner_active = True
+        self.stop_mining = False
+
+        self.mine_block()
 
         pass
 
@@ -131,6 +140,8 @@ class BlockMiner(threading.Thread):
                 self.stop()
             else:
                 print ("Nothing to worry about. Might have to remine")
+                self.stop_reason = "remine"
+                self.stop()
 
             print ("Signature:" + block_data['signature'])
         except Exception as err:
