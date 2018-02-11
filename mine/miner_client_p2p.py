@@ -13,6 +13,8 @@ import datetime as date
 
 import sys
 
+from miner import BlockMiner
+
 sys.path.append("../CryptoWork")
 sys.path.append("../block")
 sys.path.append("../node")
@@ -70,6 +72,8 @@ private_key = crypto_key_gen.from_private_pem('./keys/secret.pem')
 
 blockchain = BlockChain([])
 
+miners = []
+
 def load_blockchain():
 
     try:
@@ -93,66 +97,6 @@ def get_miner_secret():
     sk = crypto_key_gen.from_private_pem('./keys/secret.pem')
     return sk
 
-def header_string(index, prev_hash, data, timestamp, nonce):
-    return str(index) + str(prev_hash) + str(data) + str(timestamp) + str(nonce)
-def generate_hash(header_string):
-
-    sha = hashlib.sha256()
-    sha.update(header_string.encode('utf-8'))
-    return sha.hexdigest()
-
-def mine(block_dict, NUM_ZEROS=4):
-    mine_block_dict = dict.copy(block_dict)
-
-    mine_block_dict['nonce'] = int(mine_block_dict['nonce'])
-
-    while True:
-
-        block_header_string = header_string(mine_block_dict['index'], mine_block_dict['prev_hash'], mine_block_dict['data'], mine_block_dict['timestamp'], mine_block_dict['nonce'])
-        block_hash = generate_hash(block_header_string)
-
-        print (block_hash)
-
-        if (str(block_hash[0:NUM_ZEROS]) == '0' * NUM_ZEROS):
-            mine_block_dict['hash'] = block_hash
-            break
-
-        mine_block_dict['nonce'] = mine_block_dict['nonce'] + 1
-
-    return mine_block_dict
-
-
-def create_block(block_return, transaction):
-    print ("mining block...")
-
-    iteration = len(blockchain.blocks)
-
-    prev_block = blockchain.blocks[iteration - 1]
-
-    miner_secret = get_miner_secret()
-    miner_address = get_miner_address()
-
-    reward = Reward(miner_address, transaction.amnt, block_iteration = iteration, private_key = miner_secret )
-
-    data = json.dumps([str(transaction), str(reward)])
-
-    block_data = {}
-    block_data['index'] = iteration
-    block_data['timestamp'] = date.datetime.now()
-    block_data['data'] = str(data)
-    block_data['prev_hash'] = prev_block.hash
-    block_data['hash'] = None
-    block_data['nonce'] = 0
-
-    mined_block_data = mine(block_data)
-
-    new_block = Block.from_dict(mined_block_data)
-
-    print (new_block)
-
-    block_return.append(new_block)
-    return block_return
-
 # Handle transactions
 def transaction_handler(broadcast_message, payload):
 
@@ -160,11 +104,19 @@ def transaction_handler(broadcast_message, payload):
     tx = Transaction.from_json(transaction_raw)
 
     if (tx.validate_transaction()):
-        blk_return = []
 
-        create_block(blk_return, tx)
+        block_miner = BlockMiner(tx, blockchain, get_miner_address(), get_miner_secret())
 
-        new_block = blk_return[0]
+        block_miner.start()
+        miners.append(block_miner)
+
+        new_block = block_miner.join()
+
+        miners.remove(block_miner)
+
+        if (new_block == None):
+            print ("Someone beat you to it")
+            return
 
         good_block = update_blockchain(new_block)
 
@@ -227,6 +179,11 @@ def block_recieve(broadcast_message, payload):
             if (temp_block_chain.validate_chain() == True):
                 print ("valid new blockchain")
                 blockchain.blocks.append(block)
+
+                for miner in miners:
+                    if (miner.is_active()):
+                        miner.intercept_block(block, blockchain)
+
             else:
                 print("invalid chain. Not updated")
         else:
@@ -237,9 +194,6 @@ def block_recieve(broadcast_message, payload):
     blockchain.save_blockchain('./blockchain/blockchain.json')
 
     print ()
-
-    sys.stdout.write(prompt_string())
-    sys.stdout.flush()
 
 ## Request blockchains from peers
 def request_blockchain(send_message):
