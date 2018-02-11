@@ -5,6 +5,7 @@ import json
 import random
 
 import sys
+import copy
 
 sys.path.append("../CryptoWork")
 sys.path.append("../block")
@@ -84,9 +85,39 @@ def load_blockchain(): ## Function for loading the blockchain from local copy
 
 def block_recieve(broadcast_message, payload):
 
+    print()
     print ("NEW BLOCK RECIEVED")
 
-    print (payload)
+    block_json = payload['data']
+
+    try:
+        block = Block.from_json(block_json)
+
+        if (block.valid_block() == True):
+            temp_blocks = copy.copy(blockchain.blocks)
+
+            temp_blocks.append(block)
+            temp_block_chain = BlockChain(temp_blocks)
+
+            print (temp_block_chain)
+
+            if (temp_block_chain.validate_chain() == True):
+                print ("valid new blockchain")
+                blockchain.blocks.append(block)
+            else:
+                print("invalid chain. Not updated")
+        else:
+            print ("invalid block")
+    except json.decoder.JSONDecodeError:
+        print ("invalid block")
+
+    blockchain.save_blockchain('./blockchain/blockchain.json')
+
+    print ()
+
+    sys.stdout.write(prompt_string())
+    sys.stdout.flush()
+
 
 ## Request blockchains from peers
 def request_blockchain(send_message):
