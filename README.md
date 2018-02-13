@@ -30,7 +30,7 @@ Or if you already generated your keys. Move them to the `./keys` folder as `publ
 Run the wallet
 
 ``
-python wallet_client.py
+python wallet_client_p2p.py
 ``
 
 ## Running the Miner
@@ -46,12 +46,12 @@ Or if you already generated your keys. Move them to the `./keys` folder as `publ
 Run the miner
 
 ``
-python miner_client.py
+python miner_client_p2p.py
 ``
 
 ## Issues
 
-* Not fully P2P
+* Local P2P, only shown to work on unix systems (Need to make work with Windows, and MacOS)
 * Look out for block overload
 * Not worth anything (yet)
 
