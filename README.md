@@ -7,6 +7,8 @@ Download the `deploy` branch or clone it
 
 Install the deps
 
+NOTE: Make sure you have python 3 installed on your machine.
+
 ``
 pip install -r requirements.txt
 ``
