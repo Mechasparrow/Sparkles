@@ -53,7 +53,7 @@ python miner_client_p2p.py
 
 ## Issues
 
-* Local P2P, only shown to work on unix systems (Need to make work with Windows, and MacOS)
+* LAN P2P, only shown to work on unix systems (Need to make work with Windows, and MacOS)
 * Look out for block overload
 * Not worth anything (yet)
 
